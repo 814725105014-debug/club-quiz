@@ -2739,6 +2739,43 @@ function getAuditLogs(limit = 100) {
  */
 
 function doGet(e) {
+  // 1. JSON API endpoint for Live Leaderboard & Proctoring Sync
+  if (e && e.parameter && (e.parameter.action === 'getLeaderboard' || e.parameter.api === 'leaderboard')) {
+    try {
+      var ss = getSpreadsheet();
+      var subSheet = ss.getSheetByName('SUBMISSIONS_LOG');
+      if (!subSheet) {
+        return ContentService.createTextOutput(JSON.stringify({ success: true, leaderboard: [] }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      var data = subSheet.getDataRange().getValues();
+      var rows = data.slice(1);
+      var studentMap = {};
+      rows.forEach(function(r) {
+        var email = String(r[2] || '').toLowerCase().trim();
+        var name = String(r[3] || '').toUpperCase().trim();
+        var year = String(r[4] || 'I Year');
+        var dept = String(r[5] || 'EEE');
+        var score = Number(r[7]) || 0;
+        var passed = (r[10] === true || String(r[10]).toLowerCase() === 'true');
+
+        if (email) {
+          if (!studentMap[email]) {
+            studentMap[email] = { name: name, email: email, year: year, dept: dept, totalScore: 0, passedCount: 0 };
+          }
+          studentMap[email].totalScore += score;
+          if (passed) studentMap[email].passedCount += 1;
+        }
+      });
+      var leaderboard = Object.values(studentMap).sort(function(a, b) { return b.totalScore - a.totalScore; });
+      return ContentService.createTextOutput(JSON.stringify({ success: true, leaderboard: leaderboard }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
   const template = HtmlService.createTemplateFromFile('Index');
 
   // Inject server bootstrap context
@@ -2793,7 +2830,25 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 2. Direct Quiz Conduction & Proctoring Report Ingestion
+    // 2. Student Registration Intake
+    if (postData.action === 'registerStudent' || postData.type === 'registration') {
+      var regSheet = ss.getSheetByName('REGISTERED_STUDENTS');
+      if (!regSheet) {
+        regSheet = ss.insertSheet('REGISTERED_STUDENTS');
+        regSheet.appendRow(['timestamp', 'student_name', 'student_email', 'year', 'department']);
+      }
+      regSheet.appendRow([
+        new Date(),
+        (postData.name || postData.student_name || '').toUpperCase(),
+        (postData.email || postData.student_email || '').toLowerCase(),
+        postData.year || 'I Year',
+        postData.department || postData.dept || 'EEE'
+      ]);
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Student Registered' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 3. Direct Quiz Conduction & Proctoring Report Ingestion
     if (postData.quiz_id || postData.student_email) {
       let subSheet = ss.getSheetByName('SUBMISSIONS_LOG');
       if (!subSheet) {

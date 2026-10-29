@@ -1096,10 +1096,13 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'registerStudent',
+              student_name: userData.name,
               name: userData.name,
+              student_email: userData.email,
               email: userData.email,
               year: userData.year,
               department: userData.dept,
+              dept: userData.dept,
               timestamp: new Date().toISOString()
             })
           }).catch(e => console.warn('Sync note:', e));
@@ -1114,15 +1117,23 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'submitQuizScore',
+              student_email: this.user.email,
               email: this.user.email,
+              student_name: this.user.name,
               name: this.user.name,
               year: this.user.year,
               department: this.user.dept,
+              dept: this.user.dept,
+              quiz_id: quizId,
               quizId: quizId,
               score: score,
-              totalMarks: totalMarks,
+              total: totalMarks,
+              total_marks: totalMarks,
+              percentage: Math.round((score / totalMarks) * 100),
               passed: passed,
-              violations: infractions,
+              violations_count: this.violationCount,
+              proctoring_status: this.violationCount >= this.MAX_VIOLATIONS ? 'TERMINATED' : (this.violationCount > 0 ? 'FLAGGED' : 'CLEAN'),
+              proctoring_events: infractions,
               timestamp: new Date().toISOString()
             })
           }).catch(e => console.warn('Sync note:', e));

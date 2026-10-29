@@ -177,6 +177,7 @@
       countdownSeconds: 10,
       timerInterval: null,
       currentFilter: 'ALL',
+      APPS_SCRIPT_URL: 'https://script.google.com/a/macros/trp.srmtrichy.edu.in/s/AKfycbyO2asCYfAeg61GuNfhUMInNDEJaB0UeD82ZhuCIpL8FB-QT6aXxgpBt7D7BmIwjsEuWg/exec',
 
       allContenders: [
         { name: 'HARIHARAN V', year: 'II Year', dept: 'EEE', passed: 5, score: 50 },
@@ -188,8 +189,39 @@
 
       init() {
         this.loadLiveData();
+        this.fetchRemoteLeaderboard();
         this.render();
         this.startTicker();
+      },
+
+      async fetchRemoteLeaderboard() {
+        try {
+          const res = await fetch(this.APPS_SCRIPT_URL + '?action=getLeaderboard');
+          const data = await res.json();
+          if (data && data.success && Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+            data.leaderboard.forEach(r => {
+              const existing = this.allContenders.find(c => c.name.toUpperCase() === r.name.toUpperCase());
+              if (existing) {
+                existing.score = r.totalScore;
+                existing.passed = r.passedCount;
+                existing.year = r.year || existing.year;
+                existing.dept = r.dept || existing.dept;
+              } else {
+                this.allContenders.push({
+                  name: r.name.toUpperCase(),
+                  year: r.year || 'I Year',
+                  dept: r.dept || 'EEE',
+                  passed: r.passedCount,
+                  score: r.totalScore
+                });
+              }
+            });
+            this.allContenders.sort((a, b) => b.score - a.score);
+            this.render();
+          }
+        } catch (e) {
+          // Graceful fallback to local cache
+        }
       },
 
       loadLiveData() {
@@ -303,6 +335,7 @@
           if (this.countdownSeconds <= 0) {
             this.countdownSeconds = 10;
             this.loadLiveData();
+            this.fetchRemoteLeaderboard();
             this.render();
           }
         }, 1000);
