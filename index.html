@@ -364,6 +364,99 @@
         </div>
       </div>
     </div>
+
+    <!-- =====================================================================
+         DEDICATED PERFORMANCE & SOLUTIONS RESULT VIEW (NEAT PAGE, NO POPUPS)
+         ===================================================================== -->
+    <div id="examResultView" style="display: none;" class="result-view-container">
+      <!-- Breadcrumb -->
+      <div class="result-breadcrumb">
+        <a onclick="StudentApp.returnToDashboard()"><i class="fas fa-arrow-left"></i> Back to Assessments</a>
+        <span>&bull;</span>
+        <span id="resultQuizBreadcrumb">Quiz Assessment</span>
+        <span>&bull;</span>
+        <span style="color: var(--text-white);">Official Performance Report</span>
+      </div>
+
+      <!-- Result Hero Banner -->
+      <div class="result-hero" id="resultHeroCard">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.25rem;">
+          <div>
+            <div id="resultVerdictBadge" class="result-hero-badge badge-passed-hero">
+              <i class="fas fa-check-circle"></i> PASSED WITH DISTINCTION
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 0.35rem;" id="resultQuizTitleDisplay">Fundamentals of Embedded Systems</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+              Candidate: <strong style="color: var(--text-white);" class="input-uppercase" id="resultCandidateName">STUDENT NAME</strong> &bull; 
+              <span id="resultCandidateMeta">I Year (EEE)</span> &bull; 
+              Evaluated: <span id="resultTimestamp">Just now</span>
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Assessment Score</div>
+            <div class="result-score-highlight" id="resultScoreHighlight">
+              10<span class="unit">/10</span>
+            </div>
+            <div style="font-family: var(--font-code); color: var(--accent-cyan); font-weight: 700; font-size: 1.05rem;" id="resultAccuracyHighlight">
+              100% Accuracy
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Key Metrics Cards -->
+        <div class="result-stats-grid">
+          <div class="result-stat-card">
+            <span class="result-stat-val" style="color: var(--accent-cyan);" id="statScoreEarned">10 / 10</span>
+            <span class="result-stat-lbl">Marks Earned</span>
+          </div>
+          <div class="result-stat-card">
+            <span class="result-stat-val" style="color: var(--accent-green);" id="statAccuracyPercent">100%</span>
+            <span class="result-stat-lbl">Accuracy Rate</span>
+          </div>
+          <div class="result-stat-card">
+            <span class="result-stat-val" id="statProctorAudit">0 Strikes</span>
+            <span class="result-stat-lbl">Proctoring Audit</span>
+          </div>
+          <div class="result-stat-card">
+            <span class="result-stat-val" style="color: var(--accent-amber);" id="statPassThreshold">50% Benchmark</span>
+            <span class="result-stat-lbl">Qualification Criteria</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solutions Review Header -->
+      <div class="solution-section-title">
+        <div>
+          <h2 style="font-size: 1.4rem; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-clipboard-check" style="color: var(--accent-cyan);"></i> Detailed Solution Breakdown & Analysis
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem;">
+            Review each question, your recorded response, verified correct key, and comprehensive technical rationale.
+          </p>
+        </div>
+      </div>
+
+      <!-- Solutions List Container -->
+      <div id="resultSolutionsList">
+        <!-- Dynamically populated question cards -->
+      </div>
+
+      <!-- Result Action Bar Dock -->
+      <div class="result-actions-dock">
+        <button class="btn btn-primary" onclick="StudentApp.returnToDashboard()">
+          <i class="fas fa-th-large"></i> Return to Assessments Dashboard
+        </button>
+        <button class="btn btn-secondary" id="btnRetakeFromResult" onclick="StudentApp.retakeFromResults()">
+          <i class="fas fa-redo"></i> Retake Assessment
+        </button>
+        <button class="btn btn-secondary" onclick="StudentApp.switchTab('leaderboard'); StudentApp.returnToDashboard();">
+          <i class="fas fa-trophy"></i> View Leaderboard
+        </button>
+        <button class="btn btn-secondary" onclick="StudentApp.switchTab('certificate'); StudentApp.returnToDashboard();">
+          <i class="fas fa-award"></i> View Certificate
+        </button>
+      </div>
+    </div>
   </main>
 
   <!-- =====================================================================
@@ -450,6 +543,189 @@
       <button class="btn btn-danger" style="width: 100%;" onclick="StudentApp.dismissWarningModal()">
         I Understand & Resume Examination
       </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: QUIZ LAUNCH CONFIRMATION (REPLACES NATIVE BROWSER POPUP)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="quizLaunchModal">
+    <div class="modal-card" style="max-width: 540px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <span class="status-badge badge-p1" id="launchQuizSessionBadge">QUIZ-01 &bull; SESSION 1</span>
+        <button class="btn btn-secondary btn-sm" onclick="StudentApp.closeLaunchModal()" style="border-radius: 50%; width: 34px; height: 34px; padding: 0;" title="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.35rem;" id="launchQuizTitle">Launch Assessment</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;" id="launchQuizMetaBadge">
+        5 Questions &bull; 10 Total Marks &bull; Duration: 15 Mins
+      </p>
+
+      <div class="proctor-rule-box">
+        <h4><i class="fas fa-shield-halved" style="color: var(--accent-cyan);"></i> Anti-Cheat Proctoring Rules</h4>
+        <ul>
+          <li>
+            <i class="fas fa-expand" style="color: var(--accent-cyan);"></i>
+            <span><strong>Fullscreen Protocol:</strong> Fullscreen mode will be requested and locked during this assessment.</span>
+          </li>
+          <li>
+            <i class="fas fa-window-restore" style="color: var(--accent-amber);"></i>
+            <span><strong>Window Integrity:</strong> Tab switching, minimizing, or exiting fullscreen is strictly prohibited and recorded.</span>
+          </li>
+          <li>
+            <i class="fas fa-exclamation-triangle" style="color: var(--accent-red);"></i>
+            <span><strong>Strike Threshold:</strong> Accumulating 3 violations will trigger instant auto-submission with recorded infractions.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="StudentApp.closeLaunchModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" onclick="StudentApp.confirmAndLaunchQuiz()">
+          <i class="fas fa-play"></i> Agree & Start Assessment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: EXAM EXIT CONFIRMATION (REPLACES NATIVE CONFIRM)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="examExitConfirmModal">
+    <div class="modal-card warning-theme" style="max-width: 480px; text-align: center;">
+      <div style="width: 65px; height: 65px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1rem;">
+        <i class="fas fa-door-open"></i>
+      </div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Exit Assessment?</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Are you sure you want to exit the examination? Any unsubmitted responses for this attempt will not be saved.
+      </p>
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="StudentApp.closeExitModal()">
+          Resume Exam
+        </button>
+        <button class="btn btn-danger" style="flex: 1;" onclick="StudentApp.confirmExitExam()">
+          <i class="fas fa-sign-out-alt"></i> Exit to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: EXAM SUBMISSION CONFIRMATION (REPLACES NATIVE CONFIRM)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="examSubmitConfirmModal">
+    <div class="modal-card success-theme" style="max-width: 500px; text-align: center;">
+      <div style="width: 65px; height: 65px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--accent-green); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1rem;">
+        <i class="fas fa-check-double"></i>
+      </div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Finalize Submission?</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        You have answered <strong style="color: var(--accent-cyan);" id="submitModalAnsweredCount">0</strong> of <strong id="submitModalTotalCount">5</strong> questions.
+      </p>
+
+      <div id="submitModalWarningBox" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.88rem; color: #FCD34D; text-align: left;">
+        <i class="fas fa-exclamation-triangle"></i> You have unanswered questions remaining! Unanswered questions receive 0 marks.
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="StudentApp.closeSubmitConfirmModal()">
+          Review Answers
+        </button>
+        <button class="btn btn-success" style="flex: 1;" onclick="StudentApp.confirmSubmitExam()">
+          <i class="fas fa-check-circle"></i> Yes, Submit Exam
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: TIME EXPIRED NOTIFICATION (REPLACES NATIVE ALERT)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="examTimeExpiredModal">
+    <div class="modal-card warning-theme" style="max-width: 480px; text-align: center;">
+      <div style="width: 65px; height: 65px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1rem;">
+        <i class="fas fa-hourglass-end"></i>
+      </div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Time Has Expired!</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Your allotted examination time has elapsed. Your answers are now being evaluated and submitted automatically.
+      </p>
+      <button class="btn btn-primary" style="width: 100%;" onclick="StudentApp.dismissTimeExpiredModal()">
+        <i class="fas fa-chart-bar"></i> View Performance Results
+      </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: SIGN OUT CONFIRMATION (REPLACES NATIVE CONFIRM)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="signOutConfirmModal">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color: var(--accent-red); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Sign Out?</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Are you sure you want to sign out of your EMBEDX student account?
+      </p>
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('signOutConfirmModal').classList.remove('active')">
+          Cancel
+        </button>
+        <button class="btn btn-danger" style="flex: 1;" onclick="StudentApp.confirmSignOut()">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: GENERIC CYBER ALERT (REPLACES ALL WINDOW.ALERT)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="customAlertModal">
+    <div class="modal-card" style="max-width: 460px; text-align: center;">
+      <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(0, 210, 255, 0.15); color: var(--accent-cyan); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;" id="customAlertIconBox">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem;" id="customAlertTitle">Notification</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;" id="customAlertMessage">
+        Notice text.
+      </p>
+      <button class="btn btn-primary" style="width: 100%;" onclick="document.getElementById('customAlertModal').classList.remove('active')">
+        Acknowledge
+      </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       CUSTOM MODAL: EMAIL SIGN-IN FALLBACK (REPLACES NATIVE BROWSER PROMPT)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="customEmailModal">
+    <div class="modal-card" style="max-width: 460px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.25rem;"><i class="fab fa-google" style="color: var(--accent-cyan);"></i> Google Email Login</h3>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('customEmailModal').classList.remove('active')" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        Enter your Google email address to access your assessment dashboard:
+      </p>
+      <form onsubmit="event.preventDefault(); StudentApp.submitManualEmail();">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="inputManualEmail" class="form-control" required placeholder="your.name@gmail.com" />
+        </div>
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('customEmailModal').classList.remove('active')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Continue</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -567,25 +843,25 @@
       signInWithGoogle() {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.GoogleAuthProvider();
-          // No hd restriction! ANY Google account permitted
           firebase.auth().signInWithPopup(provider)
             .then(result => {
               const gUser = result.user;
               this.handleGoogleLoginSuccess(gUser.email, gUser.displayName);
             })
             .catch(err => {
-              console.warn('Google Popup fallback:', err);
-              // Fallback prompt if popup was blocked
-              const manualEmail = prompt('Enter your Google email address:');
-              if (manualEmail && manualEmail.includes('@')) {
-                this.handleGoogleLoginSuccess(manualEmail, manualEmail.split('@')[0]);
-              }
+              console.warn('Google Popup blocked or cancelled, opening email modal:', err);
+              document.getElementById('customEmailModal').classList.add('active');
             });
         } else {
-          const manualEmail = prompt('Enter your Google email address:');
-          if (manualEmail && manualEmail.includes('@')) {
-            this.handleGoogleLoginSuccess(manualEmail, manualEmail.split('@')[0]);
-          }
+          document.getElementById('customEmailModal').classList.add('active');
+        }
+      },
+
+      submitManualEmail() {
+        const email = document.getElementById('inputManualEmail').value.trim();
+        if (email && email.includes('@')) {
+          document.getElementById('customEmailModal').classList.remove('active');
+          this.handleGoogleLoginSuccess(email, email.split('@')[0]);
         }
       },
 
@@ -618,7 +894,7 @@
         const dept = document.getElementById('regDept').value;
 
         if (!rawName || rawName.length < 2) {
-          alert('Please enter your full name.');
+          this.showCustomAlert('Registration Required', 'Please enter your full student name before proceeding.');
           return;
         }
 
@@ -707,14 +983,17 @@
       },
 
       signOut() {
-        if (confirm('Are you sure you want to sign out?')) {
-          localStorage.removeItem('embedx_current_user');
-          this.user = null;
-          if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().signOut().catch(() => {});
-          }
-          this.showLoginGate();
+        document.getElementById('signOutConfirmModal').classList.add('active');
+      },
+
+      confirmSignOut() {
+        document.getElementById('signOutConfirmModal').classList.remove('active');
+        localStorage.removeItem('embedx_current_user');
+        this.user = null;
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          firebase.auth().signOut().catch(() => {});
         }
+        this.showLoginGate();
       },
 
       loadAdminConfig() {
@@ -767,13 +1046,18 @@
 
           if (passedRecord) {
             statusBadgeHtml = `<span class="status-badge badge-done"><i class="fas fa-check-circle"></i> PASSED (${passedRecord.score}/${quiz.totalMarks})</span>`;
-            actionBtnHtml = `<button class="btn btn-secondary btn-sm" onclick="StudentApp.startQuiz('${quiz.id}')"><i class="fas fa-redo"></i> Retake</button>`;
+            actionBtnHtml = `
+              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="StudentApp.viewSavedResult('${quiz.id}')"><i class="fas fa-clipboard-check"></i> Review Solutions</button>
+                <button class="btn btn-secondary btn-sm" onclick="StudentApp.openLaunchModal('${quiz.id}')"><i class="fas fa-redo"></i> Retake</button>
+              </div>
+            `;
           } else if (!isPhaseActive) {
             statusBadgeHtml = `<span class="status-badge badge-locked"><i class="fas fa-lock"></i> ${isPhase1 ? 'PHASE 1 INACTIVE' : 'LOCKED (PHASE 2)'}</span>`;
             actionBtnHtml = `<button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5;"><i class="fas fa-lock"></i> Locked</button>`;
           } else {
             statusBadgeHtml = `<span class="status-badge badge-ready"><i class="fas fa-play"></i> READY</span>`;
-            actionBtnHtml = `<button class="btn btn-primary btn-sm" onclick="StudentApp.startQuiz('${quiz.id}')"><i class="fas fa-arrow-right"></i> Start Quiz</button>`;
+            actionBtnHtml = `<button class="btn btn-primary btn-sm" onclick="StudentApp.openLaunchModal('${quiz.id}')"><i class="fas fa-arrow-right"></i> Start Quiz</button>`;
           }
 
           const card = document.createElement('div');
@@ -787,7 +1071,7 @@
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem; flex-grow: 1;">
               ${quiz.desc}
             </p>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.5rem;">
               <span>${quiz.questions.length} Questions &bull; ${quiz.totalMarks} Marks</span>
               ${actionBtnHtml}
             </div>
@@ -816,15 +1100,36 @@
       },
 
       // =====================================================================
-      // FULLSCREEN PROCTORED EXAMINATION ENGINE
+      // FULLSCREEN PROCTORED EXAMINATION ENGINE (ZERO NATIVE POPUPS)
       // =====================================================================
-      startQuiz(quizId) {
+      pendingLaunchQuizId: null,
+      lastResultQuizId: null,
+
+      openLaunchModal(quizId) {
         const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
         if (!quiz) return;
 
-        if (!confirm(`Launch ${quiz.title}?\n\nANTI-CHEAT PROCTORING RULES:\n• Fullscreen mode will be requested.\n• Tab switching, minimizing, or exiting fullscreen is prohibited.\n• 3 violations will trigger instant auto-submission.`)) {
-          return;
-        }
+        this.pendingLaunchQuizId = quizId;
+        document.getElementById('launchQuizSessionBadge').textContent = `${quiz.id} • SESSION ${quiz.sessionOrder}`;
+        document.getElementById('launchQuizTitle').textContent = quiz.title;
+        document.getElementById('launchQuizMetaBadge').textContent = `${quiz.questions.length} Questions • ${quiz.totalMarks} Total Marks • Duration: ${this.adminConfig.quizDurationMinutes || 15} Mins`;
+        document.getElementById('quizLaunchModal').classList.add('active');
+      },
+
+      closeLaunchModal() {
+        document.getElementById('quizLaunchModal').classList.remove('active');
+        this.pendingLaunchQuizId = null;
+      },
+
+      confirmAndLaunchQuiz() {
+        const qId = this.pendingLaunchQuizId;
+        this.closeLaunchModal();
+        if (qId) this.startQuiz(qId);
+      },
+
+      startQuiz(quizId) {
+        const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
+        if (!quiz) return;
 
         this.activeQuiz = quiz;
         this.currentQuestionIndex = 0;
@@ -839,6 +1144,7 @@
 
         // Switch to exam player view
         document.getElementById('studentDashboard').style.display = 'none';
+        document.getElementById('examResultView').style.display = 'none';
         document.getElementById('examPlayerSection').style.display = 'block';
 
         document.getElementById('examQuizIdBadge').textContent = quiz.id;
@@ -884,7 +1190,7 @@
 
           if (this.remainingSeconds <= 0) {
             clearInterval(this.examTimerInterval);
-            alert('Time has expired! Submitting your examination answers.');
+            document.getElementById('examTimeExpiredModal').classList.add('active');
             this.submitExam(true, 'TIME_EXPIRED');
           }
           this.remainingSeconds--;
@@ -892,6 +1198,10 @@
 
         updateDisplay();
         this.examTimerInterval = setInterval(updateDisplay, 1000);
+      },
+
+      dismissTimeExpiredModal() {
+        document.getElementById('examTimeExpiredModal').classList.remove('active');
       },
 
       renderExamQuestion() {
@@ -994,7 +1304,7 @@
         });
       },
 
-      // Anti-Cheat Event Listeners
+      // Anti-Cheat Event Listeners & Violation Tracker
       setupAntiCheatProctor() {
         const handleInfraction = (reason) => {
           if (!this.examInProgress) return;
@@ -1050,6 +1360,7 @@
 
       updateViolationBadge() {
         const badge = document.getElementById('examStrikeBadge');
+        if (!badge) return;
         document.getElementById('examViolationCount').textContent = this.violationCount;
 
         if (this.violationCount === 0) badge.className = 'strike-badge strike-0';
@@ -1071,23 +1382,42 @@
       },
 
       cancelExamConfirm() {
-        if (confirm('Are you sure you want to exit the examination? Unsubmitted answers will be lost.')) {
-          clearInterval(this.examTimerInterval);
-          this.examInProgress = false;
-          this.exitFullscreen();
-          document.getElementById('examPlayerSection').style.display = 'none';
-          this.showDashboard();
-        }
+        document.getElementById('examExitConfirmModal').classList.add('active');
+      },
+
+      closeExitModal() {
+        document.getElementById('examExitConfirmModal').classList.remove('active');
+      },
+
+      confirmExitExam() {
+        document.getElementById('examExitConfirmModal').classList.remove('active');
+        clearInterval(this.examTimerInterval);
+        this.examInProgress = false;
+        this.exitFullscreen();
+        document.getElementById('examPlayerSection').style.display = 'none';
+        this.showDashboard();
       },
 
       submitExamConfirm() {
         const total = this.activeQuiz.questions.length;
         const answered = Object.keys(this.userAnswers).length;
+        document.getElementById('submitModalAnsweredCount').textContent = answered;
+        document.getElementById('submitModalTotalCount').textContent = total;
+        const warningBox = document.getElementById('submitModalWarningBox');
         if (answered < total) {
-          if (!confirm(`You have answered ${answered} of ${total} questions.\n\nAre you sure you want to finish and submit?`)) {
-            return;
-          }
+          warningBox.style.display = 'block';
+        } else {
+          warningBox.style.display = 'none';
         }
+        document.getElementById('examSubmitConfirmModal').classList.add('active');
+      },
+
+      closeSubmitConfirmModal() {
+        document.getElementById('examSubmitConfirmModal').classList.remove('active');
+      },
+
+      confirmSubmitExam() {
+        document.getElementById('examSubmitConfirmModal').classList.remove('active');
         this.submitExam(false, 'NORMAL_STUDENT_SUBMISSION');
       },
 
@@ -1108,7 +1438,7 @@
         const percent = Math.round((score / quiz.totalMarks) * 100);
         const passed = (percent >= quiz.passMarks);
 
-        // Update local student user object
+        // Update local student user object and save full question answers for review!
         if (!this.user.passedQuizzes) this.user.passedQuizzes = {};
         this.user.passedQuizzes[quiz.id] = {
           score: score,
@@ -1117,12 +1447,13 @@
           passed: passed,
           violationsCount: this.violationCount,
           submissionType: reason,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          savedAnswers: Object.assign({}, this.userAnswers)
         };
 
         // Recalculate total score
         let total = 0;
-        Object.values(this.user.passedQuizzes).forEach(r => total += r.score);
+        Object.values(this.user.passedQuizzes).forEach(r => total += (r.score || 0));
         this.user.totalScore = total;
 
         // Persist locally
@@ -1131,11 +1462,149 @@
         // Sync result and proctoring log to Apps Script
         this.syncSubmissionToBackend(quiz.id, score, quiz.totalMarks, passed, this.violations);
 
-        // Feedback alert
-        alert(`EXAMINATION SUBMITTED\n\nScore: ${score}/${quiz.totalMarks} (${percent}%)\nStatus: ${passed ? 'PASSED ✅' : 'FAILED ❌'}\nViolations Logged: ${this.violationCount}`);
+        // Display neat dedicated result page! ZERO BROWSER ALERT!
+        document.getElementById('examPlayerSection').style.display = 'none';
+        document.getElementById('studentDashboard').style.display = 'none';
+        this.renderResultView(quiz.id, score, percent, passed, this.userAnswers, this.violationCount);
+        document.getElementById('examResultView').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
 
+      // =====================================================================
+      // DEDICATED RESULTS & DETAILED SOLUTIONS RENDERER
+      // =====================================================================
+      renderResultView(quizId, score, percent, passed, answers, violationsCount) {
+        const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
+        if (!quiz) return;
+
+        this.lastResultQuizId = quizId;
+
+        document.getElementById('resultQuizBreadcrumb').textContent = `${quiz.id}: ${quiz.title}`;
+        document.getElementById('resultQuizTitleDisplay').textContent = quiz.title;
+        document.getElementById('resultCandidateName').textContent = this.user.name;
+        document.getElementById('resultCandidateMeta').textContent = `${this.user.year} (${this.user.dept})`;
+        document.getElementById('resultTimestamp').textContent = new Date().toLocaleString();
+
+        const heroCard = document.getElementById('resultHeroCard');
+        const verdictBadge = document.getElementById('resultVerdictBadge');
+
+        if (passed) {
+          heroCard.className = 'result-hero hero-passed';
+          verdictBadge.className = 'result-hero-badge badge-passed-hero';
+          verdictBadge.innerHTML = '<i class="fas fa-check-circle"></i> PASSED WITH DISTINCTION';
+        } else {
+          heroCard.className = 'result-hero hero-failed';
+          verdictBadge.className = 'result-hero-badge badge-failed-hero';
+          verdictBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> COMPLETED &bull; RETEST AVAILABLE';
+        }
+
+        document.getElementById('resultScoreHighlight').innerHTML = `${score}<span class="unit">/${quiz.totalMarks}</span>`;
+        document.getElementById('resultAccuracyHighlight').textContent = `${percent}% Accuracy`;
+
+        document.getElementById('statScoreEarned').textContent = `${score} / ${quiz.totalMarks}`;
+        document.getElementById('statAccuracyPercent').textContent = `${percent}%`;
+
+        const proctorStat = document.getElementById('statProctorAudit');
+        proctorStat.textContent = (violationsCount === 0) ? 'Clean (0 Strikes)' : `${violationsCount} Flagged`;
+        proctorStat.style.color = (violationsCount === 0) ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        document.getElementById('statPassThreshold').textContent = `${quiz.passMarks}% Benchmark`;
+
+        // Populate Solutions Review List
+        const solutionsListContainer = document.getElementById('resultSolutionsList');
+        solutionsListContainer.innerHTML = '';
+
+        quiz.questions.forEach((q, idx) => {
+          const userChoice = answers ? answers[q.id] : null;
+          const isCorrect = (userChoice === q.correct);
+
+          const card = document.createElement('div');
+          card.className = 'solution-card';
+
+          let optionsHtml = '';
+          q.options.forEach(opt => {
+            let optClass = 'opt-neutral';
+            let pillHtml = '';
+
+            if (opt.key === userChoice && isCorrect) {
+              optClass = 'opt-correct';
+              pillHtml = '<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Your Choice &bull; Correct (+2)</span>';
+            } else if (opt.key === userChoice && !isCorrect) {
+              optClass = 'opt-wrong';
+              pillHtml = '<span class="solution-opt-pill pill-red"><i class="fas fa-times"></i> Your Choice &bull; Incorrect</span>';
+            } else if (opt.key === q.correct) {
+              optClass = 'opt-correct';
+              pillHtml = '<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Verified Correct Answer (+2)</span>';
+            }
+
+            optionsHtml += `
+              <div class="solution-opt ${optClass}">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+                  <strong style="font-family: var(--font-code); color: var(--accent-cyan);">(${opt.key})</strong>
+                  <span>${opt.text}</span>
+                </div>
+                ${pillHtml}
+              </div>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="solution-header">
+              <span class="status-badge ${isCorrect ? 'badge-ready' : 'badge-alert'}">
+                QUESTION ${idx + 1} OF ${quiz.questions.length} &bull; ${isCorrect ? '+2 MARKS EARNED' : '0 MARKS'}
+              </span>
+              <span style="font-size: 0.82rem; font-family: var(--font-code); color: ${isCorrect ? 'var(--accent-green)' : 'var(--accent-red)'}; font-weight: 700;">
+                ${isCorrect ? '<i class="fas fa-check-circle"></i> CORRECT' : (userChoice ? '<i class="fas fa-times-circle"></i> INCORRECT' : '<i class="fas fa-minus-circle"></i> UNANSWERED')}
+              </span>
+            </div>
+
+            <div class="solution-q-text">${q.text}</div>
+
+            <div class="solution-options-list">
+              ${optionsHtml}
+            </div>
+
+            <div class="solution-explanation-card">
+              <i class="fas fa-lightbulb" style="color: var(--accent-cyan); margin-right: 0.35rem;"></i>
+              <strong>Technical Rationale:</strong> ${q.exp || 'Fundamental embedded systems architectural principle.'}
+            </div>
+          `;
+
+          solutionsListContainer.appendChild(card);
+        });
+      },
+
+      viewSavedResult(quizId) {
+        const record = this.user && this.user.passedQuizzes ? this.user.passedQuizzes[quizId] : null;
+        if (!record) {
+          this.openLaunchModal(quizId);
+          return;
+        }
+
+        document.getElementById('studentDashboard').style.display = 'none';
+        document.getElementById('examPlayerSection').style.display = 'none';
+        this.renderResultView(quizId, record.score, record.percent, record.passed, record.savedAnswers || {}, record.violationsCount || 0);
+        document.getElementById('examResultView').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      retakeFromResults() {
+        if (this.lastResultQuizId) {
+          this.openLaunchModal(this.lastResultQuizId);
+        }
+      },
+
+      returnToDashboard() {
+        document.getElementById('examResultView').style.display = 'none';
         document.getElementById('examPlayerSection').style.display = 'none';
         this.showDashboard();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      showCustomAlert(title, message) {
+        document.getElementById('customAlertTitle').textContent = title || 'Notification';
+        document.getElementById('customAlertMessage').textContent = message || '';
+        document.getElementById('customAlertModal').classList.add('active');
       },
 
       // Backend sync

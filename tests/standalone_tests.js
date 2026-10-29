@@ -116,6 +116,52 @@ runTest('Validates full 5-session question bank integrity', () => {
   });
 });
 
+// Suite 6: Zero Browser Native Dialogs in Codebase
+runTest('Enforces ZERO native alert/confirm/prompt calls across all portal HTML views', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const root = path.join(__dirname, '..');
+  const files = ['index.html', 'admin.html', 'projector.html'];
+
+  files.forEach(fileName => {
+    const filePath = path.join(root, fileName);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const regex = /(?:window\.)?(alert|confirm|prompt)\s*\(/g;
+    const matches = [];
+    let m;
+    while ((m = regex.exec(content)) !== null) {
+      matches.push(m[0]);
+    }
+    assert.strictEqual(matches.length, 0, `File ${fileName} contains ${matches.length} native browser dialog call(s): ${matches.join(', ')}`);
+  });
+});
+
+// Suite 7: Assessment Evaluation & Result Page Metrics Calculation
+runTest('Validates evaluation calculation for dedicated result screen', () => {
+  const sampleQuiz = DEFAULT_QUIZZES[0];
+  const userAnswers = {
+    'Q1-1': sampleQuiz.questions[0].correct,
+    'Q1-2': sampleQuiz.questions[1].correct,
+    'Q1-3': sampleQuiz.questions[2].correct,
+    'Q1-4': sampleQuiz.questions[3].correct,
+    'Q1-5': 'WRONG_ANSWER'
+  };
+
+  let score = 0;
+  sampleQuiz.questions.forEach(q => {
+    if (userAnswers[q.id] === q.correct) {
+      score += 2;
+    }
+  });
+
+  const percent = Math.round((score / sampleQuiz.totalMarks) * 100);
+  const passed = (percent >= sampleQuiz.passMarks);
+
+  assert.strictEqual(score, 8); // 4 correct * 2 = 8
+  assert.strictEqual(percent, 80);
+  assert.strictEqual(passed, true); // 80% >= 50%
+});
+
 console.log('================================================================');
 console.log(`TEST SUMMARY: ${passedCount} of ${totalCount} tests passed successfully.`);
 console.log('================================================================');

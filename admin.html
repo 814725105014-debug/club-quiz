@@ -428,6 +428,20 @@
     </div>
   </div>
 
+  <!-- Custom Cyber Alert Modal for Admin (Zero Native Alert) -->
+  <div class="modal-backdrop" id="customAdminAlertModal">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div style="width: 55px; height: 55px; border-radius: 50%; background: rgba(0, 210, 255, 0.15); color: var(--accent-cyan); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.85rem;" id="adminAlertIconBox">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.35rem;" id="adminAlertTitle">Admin Notification</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem; line-height: 1.5;" id="adminAlertMsg">Notification message</p>
+      <button class="btn btn-primary" style="width: 100%;" onclick="document.getElementById('customAdminAlertModal').classList.remove('active')">
+        Acknowledge
+      </button>
+    </div>
+  </div>
+
   <script>
     const AdminPortal = {
       authenticated: false,
@@ -483,6 +497,22 @@
         }
       },
 
+      showNotice(title, msg, isError) {
+        document.getElementById('adminAlertTitle').textContent = title || 'Admin Notification';
+        document.getElementById('adminAlertMsg').textContent = msg || '';
+        const iconBox = document.getElementById('adminAlertIconBox');
+        if (isError) {
+          iconBox.style.color = 'var(--accent-red)';
+          iconBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          iconBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        } else {
+          iconBox.style.color = 'var(--accent-cyan)';
+          iconBox.style.background = 'rgba(0, 210, 255, 0.15)';
+          iconBox.innerHTML = '<i class="fas fa-check-circle"></i>';
+        }
+        document.getElementById('customAdminAlertModal').classList.add('active');
+      },
+
       verifyPasskey() {
         const input = document.getElementById('adminPasskeyInput').value.trim();
         if (input === 'embedx@2025' || input === 'trp@admin' || input === 'embedx2025') {
@@ -490,7 +520,7 @@
           sessionStorage.setItem('embedx_admin_auth', 'true');
           this.showDashboard();
         } else {
-          alert('Invalid admin passkey. Please check credentials.');
+          this.showNotice('Authentication Failed', 'Invalid admin passkey. Please check authorized faculty credentials.', true);
         }
       },
 
@@ -587,7 +617,7 @@
         this.adminConfig.quizDurationMinutes = mins;
         this.saveAdminConfig();
         this.updateSwitchboardUI();
-        alert(`Assessment duration set to ${mins} minutes for all candidates.`);
+        this.showNotice('Duration Updated', `Assessment duration set to ${mins} minutes for all candidates.`);
       },
 
       saveTimerDuration() {
@@ -595,7 +625,7 @@
         if (val >= 5 && val <= 60) {
           this.adminConfig.quizDurationMinutes = val;
           this.saveAdminConfig();
-          alert(`Timer duration successfully updated to ${val} minutes.`);
+          this.showNotice('Timer Saved', `Timer duration successfully updated to ${val} minutes.`);
         }
       },
 
@@ -604,14 +634,14 @@
         if (!msg) return;
         this.adminConfig.broadcastMsg = msg;
         this.saveAdminConfig();
-        alert(`Broadcast alert sent:\n\n"${msg}"`);
+        this.showNotice('Broadcast Alert Active', `Notice pushed to all candidate portals:\n\n"${msg}"`);
       },
 
       clearBroadcast() {
         this.adminConfig.broadcastMsg = '';
         this.saveAdminConfig();
         document.getElementById('broadcastInput').value = '';
-        alert('Broadcast alert cleared.');
+        this.showNotice('Broadcast Cleared', 'Broadcast alert cleared from candidate screens.');
       },
 
       openProjectorWindow() {
@@ -709,7 +739,7 @@
           };
           targetQuiz.questions.push(newQ);
           targetQuiz.totalMarks += 2;
-          alert(`Question successfully added to ${quizId}! Total questions: ${targetQuiz.questions.length}`);
+          this.showNotice('Question Published', `Question successfully published to ${quizId}! Total questions in module: ${targetQuiz.questions.length}`);
           document.getElementById('addQuestionModal').classList.remove('active');
           document.getElementById('newQuestionForm').reset();
           this.renderQuestionsList();
