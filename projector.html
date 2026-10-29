@@ -94,12 +94,12 @@
         <div class="podium-block">
           <div>
             <div style="font-family: var(--font-code); color: #BDBDBD; font-weight: 700; font-size: 1rem;">2ND PLACE</div>
-            <div class="podium-name" id="podiumSilverName">RAMANATHAN S</div>
-            <div class="podium-year" id="podiumSilverYear">I Year &bull; ECE</div>
+            <div class="podium-name" id="podiumSilverName">AWAITING CANDIDATES</div>
+            <div class="podium-year" id="podiumSilverYear">Position Open</div>
           </div>
           <div>
-            <div class="podium-score" id="podiumSilverScore">48 pts</div>
-            <div style="font-size: 0.8rem; color: #94A3B8;">5 Quizzes Passed</div>
+            <div class="podium-score" id="podiumSilverScore">—</div>
+            <div style="font-size: 0.8rem; color: #94A3B8;">Phase 1 Live</div>
           </div>
         </div>
       </div>
@@ -113,12 +113,12 @@
         <div class="podium-block">
           <div>
             <div style="font-family: var(--font-code); color: #FFC107; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em;">CHAMPION</div>
-            <div class="podium-name" id="podiumGoldName" style="font-size: 1.45rem;">HARIHARAN V</div>
-            <div class="podium-year" id="podiumGoldYear" style="color: #FFC107;">II Year &bull; EEE</div>
+            <div class="podium-name" id="podiumGoldName" style="font-size: 1.45rem;">AWAITING FIRST FINISHER</div>
+            <div class="podium-year" id="podiumGoldYear" style="color: #FFC107;">1st Position Open</div>
           </div>
           <div>
-            <div class="podium-score" id="podiumGoldScore" style="color: #FFD54F; font-size: 2.5rem;">50 pts</div>
-            <div style="font-size: 0.85rem; color: #FFF; font-weight: 700;">100% Perfection</div>
+            <div class="podium-score" id="podiumGoldScore" style="color: #FFD54F; font-size: 2.5rem;">—</div>
+            <div style="font-size: 0.85rem; color: #FFF; font-weight: 700;">Workshop Ready</div>
           </div>
         </div>
       </div>
@@ -131,12 +131,12 @@
         <div class="podium-block">
           <div>
             <div style="font-family: var(--font-code); color: #FCD34D; font-weight: 700; font-size: 1rem;">3RD PLACE</div>
-            <div class="podium-name" id="podiumBronzeName">NANTHAKISHORE J</div>
-            <div class="podium-year" id="podiumBronzeYear">II Year &bull; EEE</div>
+            <div class="podium-name" id="podiumBronzeName">AWAITING CANDIDATES</div>
+            <div class="podium-year" id="podiumBronzeYear">Position Open</div>
           </div>
           <div>
-            <div class="podium-score" id="podiumBronzeScore">40 pts</div>
-            <div style="font-size: 0.8rem; color: #94A3B8;">4 Quizzes Passed</div>
+            <div class="podium-score" id="podiumBronzeScore">—</div>
+            <div style="font-size: 0.8rem; color: #94A3B8;">Seminar Hall Active</div>
           </div>
         </div>
       </div>
@@ -179,13 +179,7 @@
       currentFilter: 'ALL',
       APPS_SCRIPT_URL: 'https://script.google.com/a/macros/trp.srmtrichy.edu.in/s/AKfycbyO2asCYfAeg61GuNfhUMInNDEJaB0UeD82ZhuCIpL8FB-QT6aXxgpBt7D7BmIwjsEuWg/exec',
 
-      allContenders: [
-        { name: 'HARIHARAN V', year: 'II Year', dept: 'EEE', passed: 5, score: 50 },
-        { name: 'RAMANATHAN S', year: 'I Year', dept: 'ECE', passed: 5, score: 48 },
-        { name: 'NANTHAKISHORE J', year: 'II Year', dept: 'EEE', passed: 4, score: 40 },
-        { name: 'VIMALA VARSHINI M', year: 'I Year', dept: 'CSE', passed: 4, score: 38 },
-        { name: 'GAYATHRI ARUMUGAM', year: 'II Year', dept: 'AI&DS', passed: 3, score: 30 }
-      ],
+      allContenders: [],
 
       init() {
         this.loadLiveData();
@@ -263,6 +257,36 @@
         let list = [...this.allContenders];
         if (this.currentFilter !== 'ALL') {
           list = list.filter(c => c.year === this.currentFilter);
+        }
+
+        if (list.length === 0) {
+          document.getElementById('podiumGoldName').textContent = 'AWAITING FIRST FINISHER';
+          document.getElementById('podiumGoldYear').textContent = '1st Place Position Open';
+          document.getElementById('podiumGoldScore').textContent = '—';
+
+          document.getElementById('podiumSilverName').textContent = 'AWAITING CANDIDATES';
+          document.getElementById('podiumSilverYear').textContent = '2nd Place Position Open';
+          document.getElementById('podiumSilverScore').textContent = '—';
+
+          document.getElementById('podiumBronzeName').textContent = 'AWAITING CANDIDATES';
+          document.getElementById('podiumBronzeYear').textContent = '3rd Place Position Open';
+          document.getElementById('podiumBronzeScore').textContent = '—';
+
+          const tbody = document.getElementById('projectorTableBody');
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted);">
+                <i class="fas fa-satellite-dish fa-spin" style="font-size: 2.75rem; color: var(--accent-cyan); margin-bottom: 1rem; display: inline-block;"></i>
+                <h3 style="color: #FFFFFF; font-size: 1.5rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">
+                  WORKSHOP LEADERBOARD READY &bull; REAL-TIME ENGINE ACTIVE
+                </h3>
+                <p style="font-size: 1.05rem; color: #94A3B8; max-width: 600px; margin: 0 auto;">
+                  Awaiting student submissions from the 5th Floor CSE Seminar Hall. Live rankings and Top-3 podium positions will populate automatically as examinees submit their assessments.
+                </p>
+              </td>
+            </tr>
+          `;
+          return;
         }
 
         // Render Podium

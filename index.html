@@ -510,9 +510,33 @@
       init() {
         this.initFirebase();
         this.loadAdminConfig();
+        this.fetchWorkshopSettings();
+        setInterval(() => this.fetchWorkshopSettings(), 15000);
         this.setupAntiCheatProctor();
         this.setupKeyboardNavigation();
         this.checkExistingSession();
+      },
+
+      async fetchWorkshopSettings() {
+        try {
+          const res = await fetch(this.APPS_SCRIPT_URL + '?action=getWorkshopSettings');
+          const data = await res.json();
+          if (data && data.success) {
+            this.adminConfig.phase1Active = data.phase1Active;
+            this.adminConfig.phase2Active = data.phase2Active;
+            this.adminConfig.quizDurationMinutes = data.quizDurationMinutes;
+            this.adminConfig.broadcastMsg = data.broadcastMsg || '';
+            this.renderPhaseCards();
+
+            const alertEl = document.getElementById('broadcastAlert');
+            if (data.broadcastMsg) {
+              document.getElementById('broadcastAlertText').textContent = data.broadcastMsg;
+              alertEl.style.display = 'block';
+            } else {
+              alertEl.style.display = 'none';
+            }
+          }
+        } catch (e) {}
       },
 
       setupKeyboardNavigation() {
@@ -1167,25 +1191,39 @@
         } catch (e) {}
       },
 
-      // Leaderboard
-      renderLeaderboard(filterYear) {
+      // Realtime Leaderboard (Zero Dummy Data)
+      async renderLeaderboard(filterYear) {
         const tbody = document.getElementById('leaderboardTbody');
-        tbody.innerHTML = '';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Loading real-time leaderboard...</td></tr>';
 
-        // Default Contenders merged with current user
-        let contenders = [
-          { name: 'HARIHARAN V', email: '814725105014@trp.srmtrichy.edu.in', year: 'II Year', dept: 'EEE', score: 50, passed: 5 },
-          { name: 'RAMANATHAN S', email: '814724105012@trp.srmtrichy.edu.in', year: 'I Year', dept: 'ECE', score: 48, passed: 5 },
-          { name: 'NANTHAKISHORE J', email: '814724105018@trp.srmtrichy.edu.in', year: 'II Year', dept: 'EEE', score: 40, passed: 4 },
-          { name: 'VIMALA VARSHINI M', email: '814724105020@trp.srmtrichy.edu.in', year: 'I Year', dept: 'CSE', score: 38, passed: 4 },
-          { name: 'GAYATHRI ARUMUGAM', email: '814725105008@trp.srmtrichy.edu.in', year: 'II Year', dept: 'AI&DS', score: 30, passed: 3 }
-        ];
+        let contenders = [];
 
-        if (this.user) {
-          const userIndex = contenders.findIndex(c => c.email.toLowerCase() === this.user.email.toLowerCase());
-          if (userIndex >= 0) {
-            contenders[userIndex].score = this.user.totalScore || 0;
-            contenders[userIndex].passed = Object.keys(this.user.passedQuizzes || {}).length;
+        // 1. Fetch live submissions from Google Apps Script Backend
+        try {
+          const res = await fetch(this.APPS_SCRIPT_URL + '?action=getLeaderboard');
+          const data = await res.json();
+          if (data && data.success && Array.isArray(data.leaderboard)) {
+            data.leaderboard.forEach(r => {
+              contenders.push({
+                name: r.name.toUpperCase(),
+                email: r.email.toLowerCase(),
+                year: r.year || 'I Year',
+                dept: r.dept || 'EEE',
+                score: r.totalScore || 0,
+                passed: r.passedCount || 0
+              });
+            });
+          }
+        } catch (e) {
+          console.warn('Live leaderboard note:', e);
+        }
+
+        // 2. Include local examinee if completed
+        if (this.user && (this.user.totalScore > 0 || Object.keys(this.user.passedQuizzes || {}).length > 0)) {
+          const userIdx = contenders.findIndex(c => c.email.toLowerCase() === this.user.email.toLowerCase());
+          if (userIdx >= 0) {
+            contenders[userIdx].score = Math.max(contenders[userIdx].score, this.user.totalScore || 0);
+            contenders[userIdx].passed = Math.max(contenders[userIdx].passed, Object.keys(this.user.passedQuizzes || {}).length);
           } else {
             contenders.push({
               name: this.user.name,
@@ -1203,6 +1241,21 @@
 
         if (filterYear && filterYear !== 'ALL') {
           contenders = contenders.filter(c => c.year === filterYear);
+        }
+
+        tbody.innerHTML = '';
+
+        if (contenders.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+                <i class="fas fa-trophy" style="font-size: 2.2rem; color: var(--accent-cyan); margin-bottom: 0.75rem; display: block;"></i>
+                <h4 style="color: #FFFFFF; font-size: 1.25rem; margin-bottom: 0.35rem;">Awaiting Workshop Submissions</h4>
+                <p style="font-size: 0.9rem;">Complete an assessment to see your name and ranking appear live on the leaderboard!</p>
+              </td>
+            </tr>
+          `;
+          return;
         }
 
         contenders.forEach((c, index) => {

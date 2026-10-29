@@ -2739,12 +2739,12 @@ function getAuditLogs(limit = 100) {
  */
 
 function doGet(e) {
-  // 1. JSON API endpoint for Live Leaderboard & Proctoring Sync
+  // 1. JSON API endpoint for Live Leaderboard
   if (e && e.parameter && (e.parameter.action === 'getLeaderboard' || e.parameter.api === 'leaderboard')) {
     try {
       var ss = getSpreadsheet();
       var subSheet = ss.getSheetByName('SUBMISSIONS_LOG');
-      if (!subSheet) {
+      if (!subSheet || subSheet.getLastRow() <= 1) {
         return ContentService.createTextOutput(JSON.stringify({ success: true, leaderboard: [] }))
           .setMimeType(ContentService.MimeType.JSON);
       }
@@ -2770,6 +2770,80 @@ function doGet(e) {
       var leaderboard = Object.values(studentMap).sort(function(a, b) { return b.totalScore - a.totalScore; });
       return ContentService.createTextOutput(JSON.stringify({ success: true, leaderboard: leaderboard }))
         .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message, leaderboard: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // 2. JSON API endpoint for Live Workshop Settings
+  if (e && e.parameter && e.parameter.action === 'getWorkshopSettings') {
+    try {
+      var props = PropertiesService.getScriptProperties();
+      var p1 = props.getProperty('PHASE_1_ACTIVE');
+      var p2 = props.getProperty('PHASE_2_ACTIVE');
+      var dur = props.getProperty('QUIZ_DURATION');
+      var bcast = props.getProperty('BROADCAST_MSG');
+
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        phase1Active: p1 !== null ? (p1 === 'true') : true,
+        phase2Active: p2 !== null ? (p2 === 'true') : false,
+        quizDurationMinutes: dur ? Number(dur) : 15,
+        broadcastMsg: bcast || ''
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        phase1Active: true,
+        phase2Active: false,
+        quizDurationMinutes: 15,
+        broadcastMsg: ''
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // 3. JSON API endpoint for Live Proctoring Logs & Admin Submissions
+  if (e && e.parameter && e.parameter.action === 'getAdminData') {
+    try {
+      var ss = getSpreadsheet();
+      var subSheet = ss.getSheetByName('SUBMISSIONS_LOG');
+      var regSheet = ss.getSheetByName('REGISTERED_STUDENTS');
+
+      var regCount = (regSheet && regSheet.getLastRow() > 1) ? regSheet.getLastRow() - 1 : 0;
+      var submissions = [];
+      var violations = [];
+
+      if (subSheet && subSheet.getLastRow() > 1) {
+        var sData = subSheet.getDataRange().getValues().slice(1);
+        sData.forEach(function(row) {
+          var item = {
+            timestamp: row[0],
+            student_email: row[2],
+            student_name: row[3],
+            year: row[4],
+            dept: row[5],
+            quiz_id: row[6],
+            score: row[7],
+            total: row[8],
+            passed: row[10],
+            violations_count: row[11],
+            proctoring_status: row[12],
+            proctoring_events: row[13]
+          };
+          submissions.push(item);
+          if (Number(row[11]) > 0 || row[12] === 'FLAGGED' || row[12] === 'TERMINATED') {
+            violations.push(item);
+          }
+        });
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        registeredCount: regCount,
+        submissions: submissions,
+        violations: violations
+      })).setMimeType(ContentService.MimeType.JSON);
     } catch (err) {
       return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -2808,6 +2882,23 @@ function doPost(e) {
   try {
     const postData = e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
     const ss = getSpreadsheet();
+
+    // 0. Update Workshop Live Settings from Admin
+    if (postData.action === 'updateWorkshopSettings') {
+      try {
+        var props = PropertiesService.getScriptProperties();
+        if (postData.phase1Active !== undefined) props.setProperty('PHASE_1_ACTIVE', String(postData.phase1Active));
+        if (postData.phase2Active !== undefined) props.setProperty('PHASE_2_ACTIVE', String(postData.phase2Active));
+        if (postData.quizDurationMinutes !== undefined) props.setProperty('QUIZ_DURATION', String(postData.quizDurationMinutes));
+        if (postData.broadcastMsg !== undefined) props.setProperty('BROADCAST_MSG', String(postData.broadcastMsg));
+
+        return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Settings Updated' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
 
     // 1. Compatibility handler for website forms
     if (postData.type === 'join' || postData.type === 'inquiry') {
