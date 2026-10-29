@@ -65,7 +65,7 @@ Follow these commands in **Git Bash** to push this folder to your brand-new GitH
 
 ### Step 1: Open Git Bash and navigate into the folder
 ```bash
-cd /c/EmbedX/embedx-quiz-platform
+cd /c/embedx-quiz-platform
 ```
 
 ### Step 2: Initialize Git in this folder
