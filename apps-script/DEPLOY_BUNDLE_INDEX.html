@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EMBEDX Platform | SRM TRP Engineering College</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+/* ==========================================================================
+   EMBEDX Official Web App Design System
+   Matches SRM TRP Engineering College & EMBEDX Club Visual Language
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --navy-primary: #0B2A6F;
+  --navy-secondary: #123F8C;
+  --navy-dark: #071C4B;
+  --navy-deep: #04102C;
+
+  --emerald-green: #146B3A;
+  --green-light: #1E8C4E;
+  --green-glow: rgba(20, 107, 58, 0.25);
+
+  --accent-blue: #2D72D9;
+  --accent-cyan: #00D2FF;
+  --cyan-glow: rgba(0, 210, 255, 0.35);
+
+  --accent-orange: #F47B20;
+  --orange-light: #FF8F3D;
+
+  --bg-body: #071C4B;
+  --bg-surface: #0B2A6F;
+  --bg-card: #081738;
+  --bg-card-light: #0F234D;
+  --bg-glass: rgba(11, 42, 111, 0.7);
+
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-focus: rgba(0, 210, 255, 0.5);
+  --border-green: rgba(30, 140, 78, 0.4);
+
+  --text-white: #FFFFFF;
+  --text-primary: #E2E8F0;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+
+  --font-heading: 'Space Grotesk', 'Rajdhani', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --shadow-glow-cyan: 0 0 20px rgba(0, 210, 255, 0.25);
+  --shadow-glow-green: 0 0 20px rgba(30, 140, 78, 0.25);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: radial-gradient(circle at 15% 15%, #0B2A6F 0%, #071C4B 60%, #04102C 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Header */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7, 28, 75, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+
+.brand-logo {
+  height: 42px;
+  width: auto;
+  border-radius: var(--radius-sm);
+}
+
+.brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-white);
+  letter-spacing: 0.5px;
+}
+
+.brand-title span {
+  color: var(--accent-cyan);
+}
+
+.brand-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Navigation Links */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.nav-btn:hover {
+  color: var(--text-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-btn.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 210, 255, 0.1);
+  box-shadow: inset 0 0 0 1px var(--border-focus);
+}
+
+.nav-admin-badge {
+  background: var(--accent-orange);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* User Profile Badge */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(15, 35, 77, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+.user-role {
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+}
+
+/* Container & Layout */
+.app-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Typography & Hero Banner */
+.hero-banner {
+  background: linear-gradient(135deg, rgba(11, 42, 111, 0.8) 0%, rgba(8, 23, 56, 0.95) 100%);
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(20, 107, 58, 0.25);
+  border: 1px solid var(--green-light);
+  color: #4ADE80;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--text-white);
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+}
+
+.hero-subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 850px;
+  margin-bottom: 1.5rem;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.hero-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-meta-item i {
+  color: var(--accent-cyan);
+}
+
+/* Cards & Grid */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tech-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.tech-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 210, 255, 0.4);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.tech-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-green {
+  background: rgba(30, 140, 78, 0.2);
+  color: #4ADE80;
+  border: 1px solid rgba(30, 140, 78, 0.4);
+}
+
+.badge-cyan {
+  background: rgba(0, 210, 255, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.badge-orange {
+  background: rgba(244, 123, 32, 0.2);
+  color: var(--orange-light);
+  border: 1px solid rgba(244, 123, 32, 0.4);
+}
+
+.badge-muted {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--secondary-blue), var(--accent-blue));
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, var(--engineering-green), var(--green-light));
+  color: #FFFFFF;
+}
+
+.btn-green:hover {
+  background: linear-gradient(135deg, var(--green-light), #22c55e);
+  box-shadow: var(--shadow-glow-green);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Progress Bars */
+.progress-bar-wrapper {
+  margin: 1rem 0;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fill-green {
+  background: linear-gradient(90deg, var(--engineering-green), #4ADE80);
+}
+
+.fill-cyan {
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+}
+
+/* Tables */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.tech-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.tech-table th {
+  background: rgba(7, 28, 75, 0.95);
+  padding: 0.85rem 1.25rem;
+  color: var(--accent-cyan);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tech-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.tech-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(4, 16, 44, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
+}
+
+.modal-backdrop.active .modal-window {
+  transform: scale(1);
+}
+
+/* Toast Notifications */
+.toast-shelf {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toast {
+  background: rgba(8, 23, 56, 0.95);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: slideIn 0.3s ease;
+}
+
+.toast-success {
+  border-left: 4px solid #4ADE80;
+}
+
+.toast-error {
+  border-left: 4px solid #EF4444;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Forms & Inputs */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: rgba(15, 35, 77, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem;
+  color: var(--text-white);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2);
+}
+
+.form-select option {
+  background: var(--bg-card);
+  color: var(--text-white);
+}
+</style>
+
+</head>
+<body>
+
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #FFFFFF; letter-spacing: 1px;">
+          EMBED<span style="color: var(--accent-cyan);">X</span>
+        </span>
+        <span style="font-size: 0.75rem; background: rgba(0, 210, 255, 0.15); color: var(--accent-cyan); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; text-transform: uppercase;">
+          PORTAL
+        </span>
+      </div>
+      <div style="height: 18px; width: 1px; background: var(--border-subtle); margin: 0 0.5rem;"></div>
+      <span class="brand-sub">SRM TRP EEE</span>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="nav-bar">
+      <button class="nav-btn active" data-view="dashboard" onclick="App.navigate('dashboard')">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </button>
+      <button class="nav-btn" data-view="leaderboard" onclick="App.navigate('leaderboard')">
+        <i class="fa-solid fa-ranking-star"></i> Leaderboard
+      </button>
+      <!-- Dynamic Admin Navigation Links -->
+      <div id="headerAdminNavs" style="display: flex; gap: 0.5rem;"></div>
+    </nav>
+
+    <!-- User Profile Badge -->
+    <div id="headerUserBadge">
+      <div class="user-badge">
+        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+          <span class="user-name">Authenticating...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- View 1: Student Dashboard -->
+    <section id="view-dashboard" class="view-panel">
+      <div id="dashboardContent"></div>
+    </section>
+
+    <!-- View 2: Quiz Player -->
+    <section id="view-quiz-player" class="view-panel" style="display: none;">
+      <div id="quizPlayerContent"></div>
+    </section>
+
+    <!-- View 3: Leaderboard -->
+    <section id="view-leaderboard" class="view-panel" style="display: none;">
+      <div id="leaderboardContent"></div>
+    </section>
+
+    <!-- View 4: Admin Dashboard -->
+    <section id="view-admin-dashboard" class="view-panel" style="display: none;">
+      <div id="adminDashboardContent"></div>
+    </section>
+
+    <!-- View 5: Admin Quiz & Question Editor -->
+    <section id="view-admin-editor" class="view-panel" style="display: none;">
+      <div class="tech-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title"><i class="fa-solid fa-pen-to-square" style="color: var(--accent-cyan);"></i> Quiz & Question Authoring</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Create single questions or bulk import questions via validated CSV.</p>
+          </div>
+          <button class="btn btn-green" onclick="App.openBulkImportModal()">
+            <i class="fa-solid fa-file-csv"></i> Bulk Import CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Question Creation Form -->
+      <div class="tech-card" style="margin-bottom: 2rem;">
+        <h3 class="card-title" style="font-size: 1.2rem; margin-bottom: 1rem;">Add Single Question</h3>
+        <div class="form-group">
+          <label class="form-label">Target Quiz ID</label>
+          <input type="text" id="qAuthorQuizId" class="form-input" value="QUIZ-EMB-01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea id="qAuthorText" class="form-textarea" rows="3" placeholder="Enter embedded systems question..."></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Option A</label>
+            <input type="text" id="qAuthorOptA" class="form-input" placeholder="Option A text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option B</label>
+            <input type="text" id="qAuthorOptB" class="form-input" placeholder="Option B text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option C</label>
+            <input type="text" id="qAuthorOptC" class="form-input" placeholder="Option C text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option D</label>
+            <input type="text" id="qAuthorOptD" class="form-input" placeholder="Option D text" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Correct Option</label>
+            <select id="qAuthorCorrect" class="form-select">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marks</label>
+            <input type="number" id="qAuthorMarks" class="form-input" value="2" min="1" max="10" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Explanation (Visible after quiz completion)</label>
+          <input type="text" id="qAuthorExp" class="form-input" placeholder="Technical explanation for answer key" />
+        </div>
+        <button class="btn btn-primary" onclick="App.saveQuestion()"><i class="fa-solid fa-floppy-disk"></i> Save Question</button>
+      </div>
+    </section>
+
+    <!-- View 6: Admin Results (Live Monitoring) -->
+    <section id="view-admin-results" class="view-panel" style="display: none;">
+      <div id="adminResultsContent"></div>
+    </section>
+
+    <!-- View 7: Super Admin User Management -->
+    <section id="view-admin-users" class="view-panel" style="display: none;">
+      <div id="adminUsersContent"></div>
+    </section>
+
+    <!-- View 8: Unauthorized Error Screen -->
+    <section id="view-unauthorized" class="view-panel" style="display: none;">
+      <div class="tech-card" style="max-width: 650px; margin: 4rem auto; text-align: center; border-color: #EF4444; padding: 3rem 2rem;">
+        <i class="fa-solid fa-triangle-exclamation fa-3x" style="color: #EF4444; margin-bottom: 1.5rem;"></i>
+        <h2 style="font-family: var(--font-heading); color: #fff; margin-bottom: 0.75rem;">Institutional Access Restricted</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+          This platform is exclusively for verified students and faculty of SRM TRP Engineering College.
+          Access requires a Google Workspace account ending in <strong>@trp.srmtrichy.edu.in</strong>.
+        </p>
+        <div style="background: rgba(15, 35, 77, 0.8); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-code); color: var(--accent-orange); margin-bottom: 2rem;">
+          Current Session Account: <span id="unauthorizedEmailDetail">None</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 2rem;">
+          Please switch accounts in Google or sign in using your official institutional email.
+        </p>
+        <a href="https://accounts.google.com/AccountChooser" target="_blank" class="btn btn-primary">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Switch Google Account
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Reusable Modal Window -->
+  <div id="appModal" class="modal-backdrop">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+        <h3 id="modalTitle" class="card-title" style="font-size: 1.25rem;">Modal Title</h3>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;" onclick="App.closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Shelf -->
+  <div id="toastShelf" class="toast-shelf"></div>
+
+  <script>
+/**
+ * EMBEDX Client-Side Architecture & State Controller
+ * Handles RPC invocations, reactive routing, modals, and toasts
+ */
+
+const App = {
+  state: {
+    user: null,
+    dashboard: null,
+    activeView: 'dashboard',
+    activeQuiz: null,
+    quizAttempt: null,
+    answers: {},
+    timeRemaining: 0,
+    timerInterval: null,
+    pollInterval: null
+  },
+
+  init() {
+    this.renderHeader();
+    this.loadUserData();
+    this.setupEventListeners();
+  },
+
+  // =========================================================================
+  // RPC DISPATCHER WITH LOCAL PREVIEW FALLBACK
+  // =========================================================================
+
+  call(methodName, ...args) {
+    return new Promise((resolve, reject) => {
+      // Check if google.script.run is available
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(err => {
+            console.error('RPC Error [' + methodName + ']:', err);
+            reject(err);
+          })[methodName](...args);
+      } else {
+        // Mock fallback for offline or standalone browser review
+        console.warn('google.script.run unavailable. Executing mock for:', methodName);
+        setTimeout(() => {
+          this.mockRpc(methodName, args).then(resolve).catch(reject);
+        }, 300);
+      }
+    });
+  },
+
+  mockRpc(method, args) {
+    if (method === 'rpcGetCurrentUser') {
+      return Promise.resolve({
+        email: '814725105014@trp.srmtrichy.edu.in',
+        domainAuthorized: true,
+        role: 'super_admin',
+        isSuperAdmin: true,
+        isAdmin: true,
+        isStudent: false
+      });
+    }
+    if (method === 'rpcGetStudentDashboard') {
+      return Promise.resolve({
+        profile: { id: 'STU-DEMO', displayName: 'HARIHARAN V', email: '814725105014@trp.srmtrichy.edu.in', department: 'EEE' },
+        workshop: {
+          title: 'Basics of Embedded Systems and Embedded Programming Language',
+          date: '30 October 2026 (Friday)',
+          venue: '5th Floor, CSE Seminar Hall'
+        },
+        sessions: [
+          { id: 'session-1', order: 1, title: 'Fundamentals of embedded systems and their applications', phaseId: 'phase-1' },
+          { id: 'session-2', order: 2, title: 'Microcontrollers, sensors, actuators, and hardware components', phaseId: 'phase-1' },
+          { id: 'session-3', order: 3, title: 'Embedded C and introductory embedded programming', phaseId: 'phase-2' },
+          { id: 'session-4', order: 4, title: 'Programming and interfacing input/output devices', phaseId: 'phase-2' },
+          { id: 'session-5', order: 5, title: 'Basic hardware interfacing techniques using microcontrollers', phaseId: 'phase-2' }
+        ],
+        quizzes: [
+          {
+            id: 'QUIZ-EMB-01',
+            sessionId: 'session-1',
+            phaseId: 'phase-1',
+            title: 'Quiz 1: Embedded Architecture Fundamentals',
+            durationMinutes: 15,
+            totalMarks: 10,
+            attemptLimit: 2,
+            attemptsUsed: 0,
+            status: 'available',
+            bestScore: null
+          }
+        ],
+        phaseProgress: {
+          phase1: { title: 'Phase 1: Foundations', completed: false, quizzesCompleted: 0, requiredQuizzes: 2, percentage: 0 },
+          phase2: { title: 'Phase 2: Applied Firmware & Automation', completed: false, quizzesCompleted: 0, requiredQuizzes: 3, percentage: 0 }
+        },
+        certificate: { eligible: false, issued: false },
+        rank: { rank: 1, totalScore: 0, totalContenders: 45 }
+      });
+    }
+    if (method === 'rpcGetLeaderboard') {
+      return Promise.resolve({
+        generatedAt: '30 Oct 2026, 10:30',
+        totalContenders: 3,
+        leaderboard: [
+          { rank: 1, displayName: 'HARIHARAN V', email: '8147****@trp.srmtrichy.edu.in', totalScore: 10, quizzesPassed: 1, department: 'EEE' },
+          { rank: 2, displayName: 'RAMANATHAN S', email: '8147****@trp.srmtrichy.edu.in', totalScore: 8, quizzesPassed: 1, department: 'EEE' },
+          { rank: 3, displayName: 'NANTHAKISHORE J', email: '8147****@trp.srmtrichy.edu.in', totalScore: 6, quizzesPassed: 1, department: 'EEE' }
+        ]
+      });
+    }
+    return Promise.resolve({ success: true });
+  },
+
+  // =========================================================================
+  // VIEW NAVIGATION
+  // =========================================================================
+
+  navigate(viewName) {
+    this.state.activeView = viewName;
+    document.querySelectorAll('.view-panel').forEach(panel => {
+      panel.style.display = 'none';
+    });
+
+    const activeEl = document.getElementById('view-' + viewName);
+    if (activeEl) {
+      activeEl.style.display = 'block';
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === viewName);
+    });
+
+    // Clear live monitoring poll if leaving admin results
+    if (viewName !== 'admin-results' && this.state.pollInterval) {
+      clearInterval(this.state.pollInterval);
+      this.state.pollInterval = null;
+    }
+
+    // Trigger view-specific loads
+    if (viewName === 'dashboard') this.loadDashboard();
+    if (viewName === 'leaderboard') this.loadLeaderboard();
+    if (viewName === 'admin-dashboard') this.loadAdminDashboard();
+    if (viewName === 'admin-editor') this.loadAdminEditor();
+    if (viewName === 'admin-results') this.loadAdminResults(true);
+    if (viewName === 'admin-users') this.loadAdminUsers();
+  },
+
+  // =========================================================================
+  // AUTH & USER DATA
+  // =========================================================================
+
+  async loadUserData() {
+    try {
+      const user = await this.call('rpcGetCurrentUser');
+      this.state.user = user;
+      this.renderHeader();
+
+      if (!user.domainAuthorized && !user.isSuperAdmin) {
+        this.showUnauthorizedScreen(user.email);
+        return;
+      }
+
+      this.navigate('dashboard');
+    } catch (err) {
+      this.showToast('Authentication initialization failed: ' + err.message, 'error');
+    }
+  },
+
+  renderHeader() {
+    const user = this.state.user;
+    const userBadgeEl = document.getElementById('headerUserBadge');
+    const adminNavsEl = document.getElementById('headerAdminNavs');
+
+    if (user && user.email) {
+      const initial = (user.email.charAt(0) || 'U').toUpperCase();
+      userBadgeEl.innerHTML = `
+        <div class="user-badge">
+          <div class="user-avatar">${initial}</div>
+          <div class="user-details">
+            <span class="user-name">${user.email.split('@')[0]}</span>
+            <span class="user-role">${user.role.toUpperCase()}</span>
+          </div>
+        </div>
+      `;
+
+      if (user.isAdmin) {
+        adminNavsEl.innerHTML = `
+          <button class="nav-btn" data-view="admin-dashboard" onclick="App.navigate('admin-dashboard')">
+            <i class="fa-solid fa-chart-pie"></i> Admin Stats
+          </button>
+          <button class="nav-btn" data-view="admin-editor" onclick="App.navigate('admin-editor')">
+            <i class="fa-solid fa-pen-to-square"></i> Quizzes & Questions
+          </button>
+          <button class="nav-btn" data-view="admin-results" onclick="App.navigate('admin-results')">
+            <i class="fa-solid fa-satellite-dish"></i> Live Monitoring
+          </button>
+          ${user.isSuperAdmin ? `
+            <button class="nav-btn" data-view="admin-users" onclick="App.navigate('admin-users')">
+              <i class="fa-solid fa-user-shield"></i> Admins <span class="nav-admin-badge">Super</span>
+            </button>
+          ` : ''}
+        `;
+      }
+    }
+  },
+
+  showUnauthorizedScreen(email) {
+    document.querySelectorAll('.view-panel').forEach(p => p.style.display = 'none');
+    const unauthEl = document.getElementById('view-unauthorized');
+    if (unauthEl) {
+      unauthEl.style.display = 'block';
+      const detailEl = document.getElementById('unauthorizedEmailDetail');
+      if (detailEl) detailEl.textContent = email || 'Unknown / Not Logged In';
+    }
+  },
+
+  // =========================================================================
+  // DASHBOARD LOADER
+  // =========================================================================
+
+  async loadDashboard() {
+    const container = document.getElementById('dashboardContent');
+    container.innerHTML = '<div style="text-align:center; padding: 3rem;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-cyan);"></i><p style="margin-top:1rem; color:var(--text-muted);">Syncing with EMBEDX Engine...</p></div>';
+
+    try {
+      const data = await this.call('rpcGetStudentDashboard');
+      this.state.dashboard = data;
+      this.renderDashboard(data);
+    } catch (err) {
+      container.innerHTML = `<div class="tech-card" style="border-color:#EF4444; text-align:center;"><i class="fa-solid fa-triangle-exclamation fa-2x" style="color:#EF4444; margin-bottom:1rem;"></i><p>${err.message}</p></div>`;
+    }
+  },
+
+  renderDashboard(data) {
+    const container = document.getElementById('dashboardContent');
+    const p1 = data.phaseProgress.phase1;
+    const p2 = data.phaseProgress.phase2;
+
+    container.innerHTML = `
+      <!-- Hero Event Banner -->
+      <div class="hero-banner">
+        <div class="hero-tag"><i class="fa-solid fa-microchip"></i> Official Technical Workshop</div>
+        <h1 class="hero-title">${data.workshop.title}</h1>
+        <p class="hero-subtitle">Department of Electrical and Electronics Engineering &bull; EMBEDX Club</p>
+        <div class="hero-meta">
+          <div class="hero-meta-item"><i class="fa-solid fa-calendar-day"></i> <strong>${data.workshop.date}</strong></div>
+          <div class="hero-meta-item"><i class="fa-solid fa-location-dot"></i> ${data.workshop.venue}</div>
+          <div class="hero-meta-item"><i class="fa-solid fa-id-card"></i> Contender: <strong>${data.profile.displayName}</strong></div>
+          <button class="btn btn-sm btn-outline" onclick="App.openNameModal()"><i class="fa-solid fa-pen"></i> Edit Certificate Name</button>
+        </div>
+      </div>
+
+      <!-- Phase Progress Overview -->
+      <div class="grid-2" style="margin-bottom: 2rem;">
+        <div class="tech-card">
+          <div class="tech-card-header">
+            <h3 class="card-title">Phase 1: Foundations</h3>
+            <span class="badge ${p1.completed ? 'badge-green' : 'badge-orange'}">
+              ${p1.completed ? '<i class="fa-solid fa-circle-check"></i> Completed' : 'In Progress'}
+            </span>
+          </div>
+          <p class="card-desc">Mastery of embedded architectures, sensors, actuators, and microcontroller internals.</p>
+          <div class="progress-bar-wrapper">
+            <div class="progress-labels">
+              <span>Required Quizzes Passed</span>
+              <span><strong>${p1.quizzesCompleted} / ${p1.requiredQuizzes}</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-green" style="width: ${p1.percentage}%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header">
+            <h3 class="card-title">Phase 2: Applied Firmware</h3>
+            <span class="badge ${p2.completed ? 'badge-green' : (p1.completed ? 'badge-cyan' : 'badge-muted')}">
+              ${p2.completed ? '<i class="fa-solid fa-circle-check"></i> Completed' : (p1.completed ? 'Unlocked' : '<i class="fa-solid fa-lock"></i> Locked')}
+            </span>
+          </div>
+          <p class="card-desc">Embedded C programming, serial protocols (UART/I2C/SPI), and automation control loops.</p>
+          <div class="progress-bar-wrapper">
+            <div class="progress-labels">
+              <span>Required Quizzes Passed</span>
+              <span><strong>${p2.quizzesCompleted} / ${p2.requiredQuizzes}</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-cyan" style="width: ${p2.percentage}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate Action Banner -->
+      <div class="tech-card" style="margin-bottom: 2rem; border-color: ${p2.completed ? 'var(--green-light)' : 'var(--border-subtle)'}; background: ${p2.completed ? 'rgba(20, 107, 58, 0.15)' : 'var(--bg-card)'};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 class="card-title" style="color: ${p2.completed ? '#4ADE80' : 'var(--text-white)'};">
+              <i class="fa-solid fa-certificate"></i> Official Certificate of Completion
+            </h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">
+              ${p2.completed
+                ? (data.certificate.issued ? 'Certificate successfully generated and verified. Ready for download.' : 'Phase 2 requirements completed! Click below to generate your official PDF certificate.')
+                : 'Certificate unlocks automatically once all Phase 1 and Phase 2 required quizzes are passed.'}
+            </p>
+          </div>
+          <div>
+            ${p2.completed ? (
+              data.certificate.issued ? `
+                <a href="${data.certificate.pdfUrl}" target="_blank" class="btn btn-green">
+                  <i class="fa-solid fa-download"></i> Download Certificate PDF
+                </a>
+              ` : `
+                <button class="btn btn-green" onclick="App.generateCertificate()">
+                  <i class="fa-solid fa-bolt"></i> Generate Certificate
+                </button>
+              `
+            ) : `
+              <button class="btn btn-outline" disabled>
+                <i class="fa-solid fa-lock"></i> Locked (Complete Phase 2)
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+
+      <!-- Workshop Quizzes Section -->
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--text-white); margin-bottom: 1rem;">
+        <i class="fa-solid fa-list-check" style="color: var(--accent-cyan);"></i> Workshop Sessions & Assessments
+      </h2>
+
+      <div class="grid-2">
+        ${data.quizzes.map(q => `
+          <div class="tech-card">
+            <div class="tech-card-header">
+              <div>
+                <span class="badge ${q.phaseId === 'phase-1' ? 'badge-cyan' : 'badge-orange'}" style="margin-bottom: 0.5rem;">
+                  ${q.phaseId === 'phase-1' ? 'Phase 1' : 'Phase 2'}
+                </span>
+                <h4 class="card-title" style="font-size: 1.15rem;">${q.title}</h4>
+              </div>
+              <span class="badge ${q.status === 'completed' ? 'badge-green' : (q.status === 'available' ? 'badge-cyan' : 'badge-muted')}">
+                ${q.status.toUpperCase()}
+              </span>
+            </div>
+            <p class="card-desc">${q.instructions || 'Technical assessment covering session learning objectives.'}</p>
+            <div style="display: flex; gap: 1rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              <span><i class="fa-solid fa-clock"></i> ${q.durationMinutes} Mins</span>
+              <span><i class="fa-solid fa-star"></i> ${q.totalMarks} Marks</span>
+              <span><i class="fa-solid fa-rotate"></i> Attempts: ${q.attemptsUsed}/${q.attemptLimit}</span>
+            </div>
+            ${q.bestScore !== null ? `
+              <div style="background: rgba(15, 35, 77, 0.8); padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem;">
+                <strong>Best Score:</strong> ${q.bestScore} / ${q.totalMarks} (${q.percentage}%) &bull;
+                <span style="color: ${q.passed ? '#4ADE80' : '#EF4444'}; font-weight: bold;">
+                  ${q.passed ? 'PASSED' : 'NOT PASSED'}
+                </span>
+              </div>
+            ` : ''}
+            <div>
+              ${q.status === 'available' ? `
+                <button class="btn btn-primary" style="width: 100%;" onclick="App.startQuiz('${q.id}')">
+                  <i class="fa-solid fa-play"></i> Start Assessment
+                </button>
+              ` : (q.status === 'completed' ? `
+                <button class="btn btn-outline" style="width: 100%;" onclick="App.startQuiz('${q.id}')">
+                  <i class="fa-solid fa-rotate-right"></i> Retake (Attempt ${q.attemptsUsed + 1}/${q.attemptLimit})
+                </button>
+              ` : `
+                <button class="btn btn-outline" style="width: 100%;" disabled>
+                  <i class="fa-solid fa-ban"></i> Max Attempts Reached
+                </button>
+              `)}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  // =========================================================================
+  // QUIZ ENGINE CONTROLLER
+  // =========================================================================
+
+  async startQuiz(quizId) {
+    this.showToast('Preparing secure quiz session...', 'success');
+    try {
+      const data = await this.call('rpcGetQuizForStudent', quizId);
+      this.state.activeQuiz = data;
+      this.state.answers = {};
+      this.state.timeRemaining = data.quiz.durationMinutes * 60;
+      this.navigate('quiz-player');
+      this.renderQuizPlayer(data);
+      this.startQuizTimer();
+    } catch (err) {
+      this.showToast('Could not load quiz: ' + err.message, 'error');
+    }
+  },
+
+  renderQuizPlayer(data) {
+    const container = document.getElementById('quizPlayerContent');
+    container.innerHTML = `
+      <div class="tech-card" style="margin-bottom: 1.5rem; position: sticky; top: 75px; z-index: 50; background: rgba(8, 23, 56, 0.95); backdrop-filter: blur(12px);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title" style="font-size: 1.35rem;">${data.quiz.title}</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">${data.questions.length} Questions &bull; Total Marks: ${data.quiz.totalMarks}</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="font-family: var(--font-code); font-size: 1.25rem; font-weight: 700; color: #00D2FF; background: rgba(0, 210, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-focus);">
+              <i class="fa-regular fa-clock"></i> <span id="quizTimerDisplay">--:--</span>
+            </div>
+            <button class="btn btn-green" onclick="App.confirmSubmitQuiz()">
+              <i class="fa-solid fa-paper-plane"></i> Submit Answers
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question List -->
+      <form id="quizForm">
+        ${data.questions.map((q, idx) => `
+          <div class="tech-card" style="margin-bottom: 1.5rem;" id="q-card-${q.id}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+              <h4 style="font-size: 1.05rem; color: var(--text-white); line-height: 1.4;">
+                <span style="color: var(--accent-cyan); font-family: var(--font-code); margin-right: 0.5rem;">[Q${idx + 1}]</span>
+                ${q.text}
+              </h4>
+              <span class="badge badge-muted">${q.marks} Mark${q.marks > 1 ? 's' : ''}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+              ${q.options.map(opt => `
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--radius-sm); background: rgba(15, 35, 77, 0.6); border: 1px solid var(--border-subtle); cursor: pointer; transition: all 0.2s ease;" class="option-label" onclick="App.selectOption('${q.id}', '${opt.key}')">
+                  <input type="radio" name="answer_${q.id}" value="${opt.key}" style="accent-color: var(--accent-cyan);" onchange="App.selectOption('${q.id}', '${opt.key}')" />
+                  <span style="font-family: var(--font-code); font-weight: bold; color: var(--accent-cyan);">${opt.key}.</span>
+                  <span style="color: var(--text-primary); font-size: 0.92rem;">${opt.text}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="button" class="btn btn-green" style="padding: 0.85rem 2.5rem; font-size: 1rem;" onclick="App.confirmSubmitQuiz()">
+            <i class="fa-solid fa-circle-check"></i> Finalize & Submit Attempt
+          </button>
+        </div>
+      </form>
+    `;
+  },
+
+  selectOption(qId, optionKey) {
+    this.state.answers[qId] = optionKey;
+    const card = document.getElementById('q-card-' + qId);
+    if (card) {
+      card.querySelectorAll('.option-label').forEach(lbl => {
+        lbl.style.borderColor = 'var(--border-subtle)';
+        lbl.style.background = 'rgba(15, 35, 77, 0.6)';
+      });
+      const selectedRadio = card.querySelector(`input[value="${optionKey}"]`);
+      if (selectedRadio) {
+        selectedRadio.checked = true;
+        const parent = selectedRadio.closest('.option-label');
+        if (parent) {
+          parent.style.borderColor = 'var(--accent-cyan)';
+          parent.style.background = 'rgba(0, 210, 255, 0.12)';
+        }
+      }
+    }
+  },
+
+  startQuizTimer() {
+    if (this.state.timerInterval) clearInterval(this.state.timerInterval);
+    const display = document.getElementById('quizTimerDisplay');
+
+    this.state.timerInterval = setInterval(() => {
+      this.state.timeRemaining--;
+      if (this.state.timeRemaining <= 0) {
+        clearInterval(this.state.timerInterval);
+        this.showToast('Time expired! Submitting answers automatically...', 'error');
+        this.executeQuizSubmit();
+        return;
+      }
+
+      const minutes = Math.floor(this.state.timeRemaining / 60);
+      const seconds = this.state.timeRemaining % 60;
+      if (display) {
+        display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        if (this.state.timeRemaining < 120) {
+          display.style.color = '#EF4444';
+        }
+      }
+    }, 1000);
+  },
+
+  confirmSubmitQuiz() {
+    const answeredCount = Object.keys(this.state.answers).length;
+    const totalCount = this.state.activeQuiz.questions.length;
+
+    if (confirm(`You have answered ${answeredCount} of ${totalCount} questions.\nAre you ready to submit your attempt?`)) {
+      this.executeQuizSubmit();
+    }
+  },
+
+  async executeQuizSubmit() {
+    if (this.state.timerInterval) clearInterval(this.state.timerInterval);
+    this.showToast('Submitting and calculating score on secure server...', 'success');
+
+    try {
+      const payload = {
+        attemptId: this.state.activeQuiz.attemptId,
+        quizId: this.state.activeQuiz.quiz.id,
+        answers: this.state.answers
+      };
+
+      const result = await this.call('rpcSubmitQuizAttempt', payload);
+      this.renderQuizResultModal(result);
+    } catch (err) {
+      this.showToast('Submission failed: ' + err.message, 'error');
+    }
+  },
+
+  renderQuizResultModal(res) {
+    const modal = document.getElementById('appModal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+
+    title.innerHTML = res.passed ? '<i class="fa-solid fa-trophy" style="color:#4ADE80;"></i> Quiz Passed!' : '<i class="fa-solid fa-flag" style="color:var(--accent-cyan);"></i> Attempt Evaluated';
+
+    body.innerHTML = `
+      <div style="text-align: center; padding: 1rem 0 1.5rem;">
+        <div style="font-size: 3rem; font-family: var(--font-heading); font-weight: 700; color: ${res.passed ? '#4ADE80' : '#E2E8F0'};">
+          ${res.score} / ${res.totalPossible}
+        </div>
+        <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1rem;">Score: <strong>${res.percentage}%</strong></p>
+        <span class="badge ${res.passed ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.4rem 1rem;">
+          ${res.passed ? 'PASSED — PHASE PROGRESS UPDATED' : 'ATTEMPT RECORDED'}
+        </span>
+      </div>
+
+      ${res.review ? `
+        <h4 style="color: var(--accent-cyan); margin: 1.5rem 0 0.75rem;">Question Review</h4>
+        <div style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;">
+          ${res.review.map(r => `
+            <div style="background: rgba(15, 35, 77, 0.6); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid ${r.isCorrect ? '#4ADE80' : '#EF4444'};">
+              <p style="font-size: 0.88rem; color: #fff; margin-bottom: 0.35rem;">${r.questionText}</p>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">
+                Your Answer: <strong style="color: ${r.isCorrect ? '#4ADE80' : '#EF4444'};">${r.selectedOption || 'None'}</strong> |
+                Correct: <strong style="color: #4ADE80;">${r.correctOption}</strong>
+              </div>
+              ${r.explanation ? `<p style="font-size: 0.78rem; color: var(--accent-cyan); margin-top: 0.25rem;"><em>${r.explanation}</em></p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="App.closeModal(); App.navigate('dashboard');">
+          <i class="fa-solid fa-house"></i> Return to Dashboard
+        </button>
+      </div>
+    `;
+
+    this.openModal();
+  },
+
+  // =========================================================================
+  // LEADERBOARD LOADER
+  // =========================================================================
+
+  async loadLeaderboard() {
+    const container = document.getElementById('leaderboardContent');
+    container.innerHTML = '<div style="text-align:center; padding: 3rem;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-cyan);"></i><p style="margin-top:1rem; color:var(--text-muted);">Calculating verified scores...</p></div>';
+
+    try {
+      const data = await this.call('rpcGetLeaderboard', 100);
+      this.renderLeaderboard(data);
+    } catch (err) {
+      container.innerHTML = `<div class="tech-card" style="border-color:#EF4444;"><p>${err.message}</p></div>`;
+    }
+  },
+
+  renderLeaderboard(data) {
+    const container = document.getElementById('leaderboardContent');
+    container.innerHTML = `
+      <div class="tech-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title"><i class="fa-solid fa-ranking-star" style="color: #F47B20;"></i> Verified Contender Leaderboard</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Updated: ${data.generatedAt} &bull; Contenders: ${data.totalContenders}</p>
+          </div>
+          <button class="btn btn-sm btn-outline" onclick="App.loadLeaderboard()">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">Rank</th>
+              <th>Student Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Quizzes Passed</th>
+              <th style="text-align: right;">Total Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.leaderboard.map(e => `
+              <tr>
+                <td>
+                  ${e.rank === 1 ? '<span class="badge" style="background:#FFD700; color:#000;"><i class="fa-solid fa-medal"></i> 1</span>' :
+                    (e.rank === 2 ? '<span class="badge" style="background:#C0C0C0; color:#000;"><i class="fa-solid fa-medal"></i> 2</span>' :
+                    (e.rank === 3 ? '<span class="badge" style="background:#CD7F32; color:#000;"><i class="fa-solid fa-medal"></i> 3</span>' :
+                    `<strong>#${e.rank}</strong>`))}
+                </td>
+                <td><strong>${e.displayName}</strong></td>
+                <td style="font-family: var(--font-code); color: var(--text-muted);">${e.email}</td>
+                <td>${e.department || 'EEE'}</td>
+                <td><span class="badge badge-green">${e.quizzesPassed}</span></td>
+                <td style="text-align: right; font-family: var(--font-code); font-weight: bold; font-size: 1.05rem; color: var(--accent-cyan);">${e.totalScore}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  // =========================================================================
+  // ADMIN DASHBOARD & LIVE MONITORING
+  // =========================================================================
+
+  async loadAdminDashboard() {
+    const container = document.getElementById('adminDashboardContent');
+    container.innerHTML = '<div style="text-align:center; padding: 3rem;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-cyan);"></i></div>';
+
+    try {
+      const metrics = await this.call('rpcGetAdminMetrics');
+      container.innerHTML = `
+        <div class="hero-banner" style="padding: 1.75rem;">
+          <div class="hero-tag"><i class="fa-solid fa-shield-halved"></i> Administrator Command Center</div>
+          <h1 class="hero-title" style="font-size: 1.8rem;">Real-Time Workshop Operations</h1>
+          <p class="hero-subtitle">Monitoring SRM TRP EEE Workshop Submissions, Phase Completions & Certifications</p>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 2rem;">
+          <div class="tech-card">
+            <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">Registration</span>
+            <div style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; color: #fff;">${metrics.totalRegisteredStudents}</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Registered Students (${metrics.activeStudentsCount} Active)</p>
+          </div>
+
+          <div class="tech-card">
+            <span class="badge badge-green" style="margin-bottom: 0.5rem;">Submissions</span>
+            <div style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; color: #4ADE80;">${metrics.completedAttempts}</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Completed Quiz Attempts</p>
+          </div>
+
+          <div class="tech-card">
+            <span class="badge badge-orange" style="margin-bottom: 0.5rem;">Phases</span>
+            <div style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; color: #FF8F3D;">${metrics.phase1Completions} / ${metrics.phase2Completions}</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Phase 1 / Phase 2 Completed</p>
+          </div>
+
+          <div class="tech-card">
+            <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">Certifications</span>
+            <div style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; color: #00D2FF;">${metrics.certificatesIssued}</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Official PDFs Issued</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="App.navigate('admin-results')"><i class="fa-solid fa-satellite-dish"></i> Open Live Submissions Stream</button>
+          <button class="btn btn-green" onclick="App.navigate('admin-editor')"><i class="fa-solid fa-file-import"></i> Create / Import Questions</button>
+          <button class="btn btn-outline" onclick="App.initDb()"><i class="fa-solid fa-database"></i> Re-verify 13 Relational Sheets</button>
+        </div>
+      `;
+    } catch (err) {
+      container.innerHTML = `<div class="tech-card" style="border-color:#EF4444;"><p>${err.message}</p></div>`;
+    }
+  },
+
+  async loadAdminResults(startPolling = false) {
+    const container = document.getElementById('adminResultsContent');
+    container.innerHTML = '<div style="text-align:center; padding: 2rem;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-cyan);"></i><p style="margin-top:0.5rem; color:var(--text-muted);">Streaming near-live attempts...</p></div>';
+
+    const fetchResults = async () => {
+      try {
+        const subs = await this.call('rpcGetAdminSubmissions');
+        this.renderAdminSubmissionsTable(subs);
+      } catch (err) {
+        container.innerHTML = `<div class="tech-card" style="border-color:#EF4444;"><p>${err.message}</p></div>`;
+      }
+    };
+
+    await fetchResults();
+
+    if (startPolling && !this.state.pollInterval) {
+      this.state.pollInterval = setInterval(fetchResults, 10000); // Poll every 10s
+    }
+  },
+
+  renderAdminSubmissionsTable(subs) {
+    const container = document.getElementById('adminResultsContent');
+    container.innerHTML = `
+      <div class="tech-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title"><i class="fa-solid fa-satellite-dish" style="color:#00D2FF;"></i> Live Submissions Monitor</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Near-live polling (every 10s) &bull; ${subs.length} Total Submissions Recorded</p>
+          </div>
+          <button class="btn btn-sm btn-outline" onclick="App.loadAdminResults(false)"><i class="fa-solid fa-rotate"></i> Poll Now</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>Attempt ID</th>
+              <th>Student</th>
+              <th>Email</th>
+              <th>Quiz ID</th>
+              <th>Status</th>
+              <th>Score</th>
+              <th>Result</th>
+              <th>Submitted At</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${subs.map(s => `
+              <tr>
+                <td style="font-family: var(--font-code); font-size: 0.8rem;">${s.attemptId}</td>
+                <td><strong>${s.studentName}</strong></td>
+                <td style="font-family: var(--font-code); color: var(--text-muted); font-size: 0.85rem;">${s.studentEmail}</td>
+                <td><span class="badge badge-muted">${s.quizId}</span></td>
+                <td><span class="badge ${s.status === 'submitted' ? 'badge-green' : 'badge-orange'}">${s.status}</span></td>
+                <td style="font-family: var(--font-code); font-weight: bold;">${s.score} / ${s.totalPossible}</td>
+                <td><span class="badge ${s.passed ? 'badge-green' : 'badge-orange'}">${s.passed ? 'PASSED' : 'ATTEMPTED'}</span></td>
+                <td style="font-size: 0.82rem; color: var(--text-muted);">${s.submittedAt}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  // =========================================================================
+  // ADMIN USERS (SUPER ADMIN DELEGATION)
+  // =========================================================================
+
+  async loadAdminUsers() {
+    const container = document.getElementById('adminUsersContent');
+    container.innerHTML = '<div style="text-align:center; padding: 2rem;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-cyan);"></i></div>';
+
+    try {
+      const data = await this.call('rpcGetAdminUsersList');
+      container.innerHTML = `
+        <div class="tech-card" style="margin-bottom: 1.5rem;">
+          <h2 class="card-title"><i class="fa-solid fa-user-shield" style="color: var(--accent-orange);"></i> Super Admin Delegation Panel</h2>
+          <p class="card-desc">Assign and manage administrative privileges for EMBEDX Executive Council and EEE Faculty.</p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 2rem;">
+          <!-- Role Assign Form -->
+          <div class="tech-card">
+            <h3 class="card-title" style="font-size: 1.2rem; margin-bottom: 1rem;">Assign Administrator Access</h3>
+
+            <div class="form-group">
+              <label class="form-label">Select Council / Faculty Leader (From Club Files)</label>
+              <select id="leaderPresetSelect" class="form-select" onchange="App.onLeaderPresetSelect(this.value)">
+                <option value="">-- Choose Council / Faculty Member --</option>
+                ${data.leadershipPresets.map(p => `
+                  <option value="${p.id}" data-name="${p.name}" data-role="${p.suggestedRole}" data-dept="${p.department}">
+                    ${p.name} (${p.role} - ${p.department})
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="adminAssignName" class="form-input" placeholder="e.g. RAMANATHAN S" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Institutional Email (@trp.srmtrichy.edu.in)</label>
+              <input type="email" id="adminAssignEmail" class="form-input" placeholder="e.g. president@trp.srmtrichy.edu.in" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Assigned Role</label>
+              <select id="adminAssignRole" class="form-select">
+                <option value="admin">Administrator (Quiz/Question/Results Access)</option>
+                <option value="coordinator">Faculty Coordinator (Dr. R. Meenal)</option>
+                <option value="hod">Head of Department (HOD EEE)</option>
+                <option value="super_admin">Super Administrator</option>
+                <option value="student">Revoke to Student</option>
+              </select>
+            </div>
+
+            <button class="btn btn-green" style="width: 100%;" onclick="App.submitAssignRole()">
+              <i class="fa-solid fa-user-plus"></i> Save Role Authorization
+            </button>
+          </div>
+
+          <!-- Existing Admins List -->
+          <div class="tech-card">
+            <h3 class="card-title" style="font-size: 1.2rem; margin-bottom: 1rem;">Authorized Administrators</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              ${data.adminUsers.map(u => `
+                <div style="background: rgba(15, 35, 77, 0.6); padding: 0.85rem; border-radius: var(--radius-sm); border-left: 3px solid ${u.isSuperAdmin ? '#F47B20' : 'var(--accent-cyan)'}; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h4 style="color: #fff; font-size: 0.95rem;">${u.name || u.email}</h4>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-code);">${u.email}</p>
+                    <span style="font-size: 0.75rem; color: var(--text-dim);">${u.department || 'EEE'}</span>
+                  </div>
+                  <div>
+                    <span class="badge ${u.isSuperAdmin ? 'badge-orange' : 'badge-cyan'}">${u.role.toUpperCase()}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      container.innerHTML = `<div class="tech-card" style="border-color:#EF4444;"><p>${err.message}</p></div>`;
+    }
+  },
+
+  onLeaderPresetSelect(id) {
+    const sel = document.getElementById('leaderPresetSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.name) {
+      document.getElementById('adminAssignName').value = opt.dataset.name;
+      document.getElementById('adminAssignRole').value = opt.dataset.role || 'admin';
+    }
+  },
+
+  async submitAssignRole() {
+    const email = document.getElementById('adminAssignEmail').value.trim();
+    const name = document.getElementById('adminAssignName').value.trim();
+    const role = document.getElementById('adminAssignRole').value;
+
+    if (!email) {
+      alert('Please enter an institutional email address.');
+      return;
+    }
+
+    try {
+      this.showToast('Assigning role...', 'success');
+      const res = await this.call('rpcAssignAdminRole', email, role, name, 'Department of EEE');
+      this.showToast(res.message, 'success');
+      this.loadAdminUsers();
+    } catch (err) {
+      this.showToast('Role assignment failed: ' + err.message, 'error');
+    }
+  },
+
+  // =========================================================================
+  // CERTIFICATE & PROFILE HELPERS
+  // =========================================================================
+
+  openNameModal() {
+    const current = this.state.dashboard ? this.state.dashboard.profile.displayName : '';
+    const modal = document.getElementById('appModal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+
+    title.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Edit Certificate Display Name';
+    body.innerHTML = `
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Please ensure your name is spelled exactly as you wish it to appear on your official SRM TRP Engineering College Certificate of Completion.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Full Name for Certificate</label>
+        <input type="text" id="certNameInput" class="form-input" value="${current}" />
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+        <button class="btn btn-green" onclick="App.saveCertificateName()"><i class="fa-solid fa-save"></i> Save Display Name</button>
+      </div>
+    `;
+    this.openModal();
+  },
+
+  async saveCertificateName() {
+    const input = document.getElementById('certNameInput');
+    const newName = input ? input.value.trim() : '';
+    if (!newName) return;
+
+    try {
+      this.showToast('Updating certificate name...', 'success');
+      const res = await this.call('rpcUpdateCertificateDisplayName', newName);
+      this.showToast('Certificate name updated to: ' + res.displayName, 'success');
+      this.closeModal();
+      this.loadDashboard();
+    } catch (err) {
+      this.showToast(err.message, 'error');
+    }
+  },
+
+  async generateCertificate() {
+    if (!confirm('Generate your official Certificate of Completion now?')) return;
+    this.showToast('Generating official certificate via Google Slides & Drive...', 'success');
+
+    try {
+      const res = await this.call('rpcGenerateCertificate');
+      this.showToast('Certificate generated successfully!', 'success');
+      this.loadDashboard();
+    } catch (err) {
+      this.showToast('Certificate generation failed: ' + err.message, 'error');
+    }
+  },
+
+  async initDb() {
+    if (!confirm('Verify and initialize database tables? (Safe & Idempotent)')) return;
+    try {
+      this.showToast('Initializing database...', 'success');
+      const res = await this.call('rpcInitDatabase');
+      this.showToast(res.message, 'success');
+    } catch (err) {
+      this.showToast(err.message, 'error');
+    }
+  },
+
+  // =========================================================================
+  // TOAST & MODAL UI
+  // =========================================================================
+
+  showToast(message, type = 'success') {
+    const shelf = document.getElementById('toastShelf');
+    if (!shelf) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}" style="color:${type === 'success' ? '#4ADE80' : '#EF4444'};"></i> <span>${message}</span>`;
+    shelf.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, 4500);
+  },
+
+  openModal() {
+    const m = document.getElementById('appModal');
+    if (m) m.classList.add('active');
+  },
+
+  closeModal() {
+    const m = document.getElementById('appModal');
+    if (m) m.classList.remove('active');
+  },
+
+  setupEventListeners() {
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') this.closeModal();
+    });
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  App.init();
+});
+</script>
+
+
+  <script>
+    // Additional admin editor methods
+    App.openBulkImportModal = function() {
+      const modal = document.getElementById('appModal');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+
+      title.innerHTML = '<i class="fa-solid fa-file-csv"></i> Bulk Import Quiz Questions';
+      body.innerHTML = `
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Paste CSV rows below. Must include headers: <code>quizId,questionText,questionType,optionA,optionB,optionC,optionD,correctAnswer,marks,explanation</code>
+        </p>
+        <div class="form-group">
+          <textarea id="csvImportInput" class="form-textarea" rows="8" placeholder="quizId,questionText,questionType,optionA,optionB,optionC,optionD,correctAnswer,marks,explanation"></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+          <button class="btn btn-green" onclick="App.submitCsvImport()"><i class="fa-solid fa-upload"></i> Validate & Import</button>
+        </div>
+      `;
+      this.openModal();
+    };
+
+    App.submitCsvImport = async function() {
+      const csv = document.getElementById('csvImportInput').value.trim();
+      if (!csv) {
+        alert('Please paste CSV data to import.');
+        return;
+      }
+      try {
+        this.showToast('Validating CSV rows...', 'success');
+        const res = await this.call('rpcImportQuestionsFromCSV', csv, 'QUIZ-EMB-01');
+        this.showToast(`Import completed! ${res.acceptedCount} accepted, ${res.rejectedCount} rejected.`, 'success');
+        this.closeModal();
+      } catch (err) {
+        this.showToast('Import failed: ' + err.message, 'error');
+      }
+    };
+
+    App.saveQuestion = async function() {
+      const q = {
+        quizId: document.getElementById('qAuthorQuizId').value.trim(),
+        text: document.getElementById('qAuthorText').value.trim(),
+        type: 'single_choice',
+        optionA: document.getElementById('qAuthorOptA').value.trim(),
+        optionB: document.getElementById('qAuthorOptB').value.trim(),
+        optionC: document.getElementById('qAuthorOptC').value.trim(),
+        optionD: document.getElementById('qAuthorOptD').value.trim(),
+        correctAnswer: document.getElementById('qAuthorCorrect').value,
+        marks: Number(document.getElementById('qAuthorMarks').value) || 2,
+        explanation: document.getElementById('qAuthorExp').value.trim()
+      };
+
+      if (!q.text) {
+        alert('Please enter question text.');
+        return;
+      }
+
+      try {
+        this.showToast('Saving question to secure repository...', 'success');
+        const res = await this.call('rpcSaveAdminQuestion', q);
+        this.showToast('Question saved successfully! ID: ' + res.questionId, 'success');
+        document.getElementById('qAuthorText').value = '';
+        document.getElementById('qAuthorOptA').value = '';
+        document.getElementById('qAuthorOptB').value = '';
+        document.getElementById('qAuthorOptC').value = '';
+        document.getElementById('qAuthorOptD').value = '';
+        document.getElementById('qAuthorExp').value = '';
+      } catch (err) {
+        this.showToast('Error saving question: ' + err.message, 'error');
+      }
+    };
+  </script>
+</body>
+</html>

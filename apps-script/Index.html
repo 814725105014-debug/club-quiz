@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EMBEDX Platform | SRM TRP Engineering College</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <?!= include('Styles'); ?>
+</head>
+<body>
+
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #FFFFFF; letter-spacing: 1px;">
+          EMBED<span style="color: var(--accent-cyan);">X</span>
+        </span>
+        <span style="font-size: 0.75rem; background: rgba(0, 210, 255, 0.15); color: var(--accent-cyan); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; text-transform: uppercase;">
+          PORTAL
+        </span>
+      </div>
+      <div style="height: 18px; width: 1px; background: var(--border-subtle); margin: 0 0.5rem;"></div>
+      <span class="brand-sub">SRM TRP EEE</span>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="nav-bar">
+      <button class="nav-btn active" data-view="dashboard" onclick="App.navigate('dashboard')">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </button>
+      <button class="nav-btn" data-view="leaderboard" onclick="App.navigate('leaderboard')">
+        <i class="fa-solid fa-ranking-star"></i> Leaderboard
+      </button>
+      <!-- Dynamic Admin Navigation Links -->
+      <div id="headerAdminNavs" style="display: flex; gap: 0.5rem;"></div>
+    </nav>
+
+    <!-- User Profile Badge -->
+    <div id="headerUserBadge">
+      <div class="user-badge">
+        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+          <span class="user-name">Authenticating...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- View 1: Student Dashboard -->
+    <section id="view-dashboard" class="view-panel">
+      <div id="dashboardContent"></div>
+    </section>
+
+    <!-- View 2: Quiz Player -->
+    <section id="view-quiz-player" class="view-panel" style="display: none;">
+      <div id="quizPlayerContent"></div>
+    </section>
+
+    <!-- View 3: Leaderboard -->
+    <section id="view-leaderboard" class="view-panel" style="display: none;">
+      <div id="leaderboardContent"></div>
+    </section>
+
+    <!-- View 4: Admin Dashboard -->
+    <section id="view-admin-dashboard" class="view-panel" style="display: none;">
+      <div id="adminDashboardContent"></div>
+    </section>
+
+    <!-- View 5: Admin Quiz & Question Editor -->
+    <section id="view-admin-editor" class="view-panel" style="display: none;">
+      <div class="tech-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 class="card-title"><i class="fa-solid fa-pen-to-square" style="color: var(--accent-cyan);"></i> Quiz & Question Authoring</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Create single questions or bulk import questions via validated CSV.</p>
+          </div>
+          <button class="btn btn-green" onclick="App.openBulkImportModal()">
+            <i class="fa-solid fa-file-csv"></i> Bulk Import CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Question Creation Form -->
+      <div class="tech-card" style="margin-bottom: 2rem;">
+        <h3 class="card-title" style="font-size: 1.2rem; margin-bottom: 1rem;">Add Single Question</h3>
+        <div class="form-group">
+          <label class="form-label">Target Quiz ID</label>
+          <input type="text" id="qAuthorQuizId" class="form-input" value="QUIZ-EMB-01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea id="qAuthorText" class="form-textarea" rows="3" placeholder="Enter embedded systems question..."></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Option A</label>
+            <input type="text" id="qAuthorOptA" class="form-input" placeholder="Option A text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option B</label>
+            <input type="text" id="qAuthorOptB" class="form-input" placeholder="Option B text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option C</label>
+            <input type="text" id="qAuthorOptC" class="form-input" placeholder="Option C text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option D</label>
+            <input type="text" id="qAuthorOptD" class="form-input" placeholder="Option D text" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Correct Option</label>
+            <select id="qAuthorCorrect" class="form-select">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marks</label>
+            <input type="number" id="qAuthorMarks" class="form-input" value="2" min="1" max="10" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Explanation (Visible after quiz completion)</label>
+          <input type="text" id="qAuthorExp" class="form-input" placeholder="Technical explanation for answer key" />
+        </div>
+        <button class="btn btn-primary" onclick="App.saveQuestion()"><i class="fa-solid fa-floppy-disk"></i> Save Question</button>
+      </div>
+    </section>
+
+    <!-- View 6: Admin Results (Live Monitoring) -->
+    <section id="view-admin-results" class="view-panel" style="display: none;">
+      <div id="adminResultsContent"></div>
+    </section>
+
+    <!-- View 7: Super Admin User Management -->
+    <section id="view-admin-users" class="view-panel" style="display: none;">
+      <div id="adminUsersContent"></div>
+    </section>
+
+    <!-- View 8: Unauthorized Error Screen -->
+    <section id="view-unauthorized" class="view-panel" style="display: none;">
+      <div class="tech-card" style="max-width: 650px; margin: 4rem auto; text-align: center; border-color: #EF4444; padding: 3rem 2rem;">
+        <i class="fa-solid fa-triangle-exclamation fa-3x" style="color: #EF4444; margin-bottom: 1.5rem;"></i>
+        <h2 style="font-family: var(--font-heading); color: #fff; margin-bottom: 0.75rem;">Institutional Access Restricted</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+          This platform is exclusively for verified students and faculty of SRM TRP Engineering College.
+          Access requires a Google Workspace account ending in <strong>@trp.srmtrichy.edu.in</strong>.
+        </p>
+        <div style="background: rgba(15, 35, 77, 0.8); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-code); color: var(--accent-orange); margin-bottom: 2rem;">
+          Current Session Account: <span id="unauthorizedEmailDetail">None</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 2rem;">
+          Please switch accounts in Google or sign in using your official institutional email.
+        </p>
+        <a href="https://accounts.google.com/AccountChooser" target="_blank" class="btn btn-primary">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Switch Google Account
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Reusable Modal Window -->
+  <div id="appModal" class="modal-backdrop">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+        <h3 id="modalTitle" class="card-title" style="font-size: 1.25rem;">Modal Title</h3>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;" onclick="App.closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Shelf -->
+  <div id="toastShelf" class="toast-shelf"></div>
+
+  <?!= include('Client'); ?>
+
+  <script>
+    // Additional admin editor methods
+    App.openBulkImportModal = function() {
+      const modal = document.getElementById('appModal');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+
+      title.innerHTML = '<i class="fa-solid fa-file-csv"></i> Bulk Import Quiz Questions';
+      body.innerHTML = `
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Paste CSV rows below. Must include headers: <code>quizId,questionText,questionType,optionA,optionB,optionC,optionD,correctAnswer,marks,explanation</code>
+        </p>
+        <div class="form-group">
+          <textarea id="csvImportInput" class="form-textarea" rows="8" placeholder="quizId,questionText,questionType,optionA,optionB,optionC,optionD,correctAnswer,marks,explanation"></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+          <button class="btn btn-green" onclick="App.submitCsvImport()"><i class="fa-solid fa-upload"></i> Validate & Import</button>
+        </div>
+      `;
+      this.openModal();
+    };
+
+    App.submitCsvImport = async function() {
+      const csv = document.getElementById('csvImportInput').value.trim();
+      if (!csv) {
+        alert('Please paste CSV data to import.');
+        return;
+      }
+      try {
+        this.showToast('Validating CSV rows...', 'success');
+        const res = await this.call('rpcImportQuestionsFromCSV', csv, 'QUIZ-EMB-01');
+        this.showToast(`Import completed! ${res.acceptedCount} accepted, ${res.rejectedCount} rejected.`, 'success');
+        this.closeModal();
+      } catch (err) {
+        this.showToast('Import failed: ' + err.message, 'error');
+      }
+    };
+
+    App.saveQuestion = async function() {
+      const q = {
+        quizId: document.getElementById('qAuthorQuizId').value.trim(),
+        text: document.getElementById('qAuthorText').value.trim(),
+        type: 'single_choice',
+        optionA: document.getElementById('qAuthorOptA').value.trim(),
+        optionB: document.getElementById('qAuthorOptB').value.trim(),
+        optionC: document.getElementById('qAuthorOptC').value.trim(),
+        optionD: document.getElementById('qAuthorOptD').value.trim(),
+        correctAnswer: document.getElementById('qAuthorCorrect').value,
+        marks: Number(document.getElementById('qAuthorMarks').value) || 2,
+        explanation: document.getElementById('qAuthorExp').value.trim()
+      };
+
+      if (!q.text) {
+        alert('Please enter question text.');
+        return;
+      }
+
+      try {
+        this.showToast('Saving question to secure repository...', 'success');
+        const res = await this.call('rpcSaveAdminQuestion', q);
+        this.showToast('Question saved successfully! ID: ' + res.questionId, 'success');
+        document.getElementById('qAuthorText').value = '';
+        document.getElementById('qAuthorOptA').value = '';
+        document.getElementById('qAuthorOptB').value = '';
+        document.getElementById('qAuthorOptC').value = '';
+        document.getElementById('qAuthorOptD').value = '';
+        document.getElementById('qAuthorExp').value = '';
+      } catch (err) {
+        this.showToast('Error saving question: ' + err.message, 'error');
+      }
+    };
+  </script>
+</body>
+</html>
