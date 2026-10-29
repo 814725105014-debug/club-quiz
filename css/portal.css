@@ -1474,3 +1474,100 @@ a, button {
   }
 }
 
+/* ==========================================================================
+   GOOGLE FORMS-STYLE ADMIN QUESTION AUTHORING & BROADCAST CONTROLLER
+   ========================================================================== */
+.broadcast-monitor-card {
+  background: rgba(7, 18, 41, 0.75);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.broadcast-live-banner {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  animation: pulseAmber 2.5s infinite;
+}
+
+@keyframes pulseAmber {
+  0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
+}
+
+.preset-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-chip:hover {
+  background: rgba(0, 210, 255, 0.15);
+  border-color: var(--accent-cyan);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.question-admin-card {
+  background: rgba(14, 34, 76, 0.65);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question-admin-card:hover {
+  border-color: var(--border-glass);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+}
+
+.question-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.question-actions-dock {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.opt-radio-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(7, 18, 41, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.opt-radio-tile.is-correct {
+  border-color: rgba(16, 185, 129, 0.6);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+

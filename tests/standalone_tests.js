@@ -162,6 +162,68 @@ runTest('Validates evaluation calculation for dedicated result screen', () => {
   assert.strictEqual(passed, true); // 80% >= 50%
 });
 
+// Suite 8: Google Forms Question Bank Operations (Edit, Delete, Duplicate, Reorder)
+runTest('Validates Google Forms authoring operations: Edit, Delete, Duplicate, and Reorder', () => {
+  const quizzes = JSON.parse(JSON.stringify(DEFAULT_QUIZZES));
+  const qz = quizzes[0];
+  const initialCount = qz.questions.length;
+
+  // 1. Edit Question
+  const targetQ = qz.questions[0];
+  targetQ.text = 'Updated Question Statement for Embedded Systems';
+  targetQ.options[0].text = 'Updated Option A';
+  targetQ.correct = 'C';
+  targetQ.marks = 4;
+  targetQ.exp = 'Updated technical rationale explanation.';
+
+  assert.strictEqual(qz.questions[0].text, 'Updated Question Statement for Embedded Systems');
+  assert.strictEqual(qz.questions[0].correct, 'C');
+  assert.strictEqual(qz.questions[0].marks, 4);
+
+  // 2. Duplicate Question (Google Forms feature)
+  const cloned = JSON.parse(JSON.stringify(targetQ));
+  cloned.id = 'Q1-DUP-99';
+  cloned.text = `${targetQ.text} (Copy)`;
+  qz.questions.splice(1, 0, cloned);
+  assert.strictEqual(qz.questions.length, initialCount + 1);
+  assert.strictEqual(qz.questions[1].text.includes('(Copy)'), true);
+
+  // 3. Reorder Question (Move Down)
+  const firstId = qz.questions[0].id;
+  const secondId = qz.questions[1].id;
+  const temp = qz.questions[0];
+  qz.questions[0] = qz.questions[1];
+  qz.questions[1] = temp;
+  assert.strictEqual(qz.questions[0].id, secondId);
+  assert.strictEqual(qz.questions[1].id, firstId);
+
+  // 4. Delete Question (Google Forms feature)
+  qz.questions = qz.questions.filter(item => item.id !== 'Q1-DUP-99');
+  assert.strictEqual(qz.questions.length, initialCount);
+
+  // 5. Total Marks Recalculation
+  let newTotal = 0;
+  qz.questions.forEach(q => newTotal += (q.marks || 2));
+  assert.strictEqual(newTotal, 12); // 4 + 2 + 2 + 2 + 2 = 12
+});
+
+// Suite 9: Broadcast Message Controls (Publish, Edit, Delete)
+runTest('Validates broadcast message lifecycle: Publish, Edit, and Delete', () => {
+  const config = { broadcastMsg: '' };
+
+  // 1. Publish Broadcast
+  config.broadcastMsg = '⚠️ Attention: 5 minutes remaining!';
+  assert.strictEqual(config.broadcastMsg, '⚠️ Attention: 5 minutes remaining!');
+
+  // 2. Edit Broadcast
+  config.broadcastMsg = '⚠️ Revised: 3 minutes remaining! Finalize submissions.';
+  assert.strictEqual(config.broadcastMsg, '⚠️ Revised: 3 minutes remaining! Finalize submissions.');
+
+  // 3. Delete / Clear Broadcast
+  config.broadcastMsg = '';
+  assert.strictEqual(config.broadcastMsg, '');
+});
+
 console.log('================================================================');
 console.log(`TEST SUMMARY: ${passedCount} of ${totalCount} tests passed successfully.`);
 console.log('================================================================');

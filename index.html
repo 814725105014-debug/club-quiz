@@ -1032,11 +1032,24 @@
         }
       },
 
+      getQuizzes() {
+        const stored = localStorage.getItem('embedx_quiz_questions');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return parsed;
+            }
+          } catch (e) {}
+        }
+        return (typeof DEFAULT_QUIZZES !== 'undefined') ? DEFAULT_QUIZZES : [];
+      },
+
       renderQuizCards() {
         const container = document.getElementById('quizCardsContainer');
         container.innerHTML = '';
 
-        DEFAULT_QUIZZES.forEach((quiz, index) => {
+        this.getQuizzes().forEach((quiz, index) => {
           const isPhase1 = (quiz.phase === 'phase-1');
           const isPhaseActive = isPhase1 ? this.adminConfig.phase1Active : this.adminConfig.phase2Active;
           const passedRecord = this.user.passedQuizzes ? this.user.passedQuizzes[quiz.id] : null;
@@ -1106,7 +1119,7 @@
       lastResultQuizId: null,
 
       openLaunchModal(quizId) {
-        const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
+        const quiz = this.getQuizzes().find(q => q.id === quizId);
         if (!quiz) return;
 
         this.pendingLaunchQuizId = quizId;
@@ -1128,7 +1141,7 @@
       },
 
       startQuiz(quizId) {
-        const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
+        const quiz = this.getQuizzes().find(q => q.id === quizId);
         if (!quiz) return;
 
         this.activeQuiz = quiz;
@@ -1426,23 +1439,24 @@
         this.examInProgress = false;
         this.exitFullscreen();
 
-        // Calculate score
+        // Calculate score dynamically based on question marks
         let score = 0;
         const quiz = this.activeQuiz;
         quiz.questions.forEach(q => {
           if (this.userAnswers[q.id] === q.correct) {
-            score += 2; // 2 marks per question
+            score += Number(q.marks || 2);
           }
         });
 
-        const percent = Math.round((score / quiz.totalMarks) * 100);
-        const passed = (percent >= quiz.passMarks);
+        const totalMarks = Number(quiz.totalMarks) || (quiz.questions.length * 2);
+        const percent = Math.round((score / totalMarks) * 100);
+        const passed = (percent >= (quiz.passMarks || 50));
 
         // Update local student user object and save full question answers for review!
         if (!this.user.passedQuizzes) this.user.passedQuizzes = {};
         this.user.passedQuizzes[quiz.id] = {
           score: score,
-          totalMarks: quiz.totalMarks,
+          totalMarks: totalMarks,
           percent: percent,
           passed: passed,
           violationsCount: this.violationCount,
@@ -1460,7 +1474,7 @@
         localStorage.setItem('embedx_student_' + this.user.email, JSON.stringify(this.user));
 
         // Sync result and proctoring log to Apps Script
-        this.syncSubmissionToBackend(quiz.id, score, quiz.totalMarks, passed, this.violations);
+        this.syncSubmissionToBackend(quiz.id, score, totalMarks, passed, this.violations);
 
         // Display neat dedicated result page! ZERO BROWSER ALERT!
         document.getElementById('examPlayerSection').style.display = 'none';
@@ -1474,7 +1488,7 @@
       // DEDICATED RESULTS & DETAILED SOLUTIONS RENDERER
       // =====================================================================
       renderResultView(quizId, score, percent, passed, answers, violationsCount) {
-        const quiz = DEFAULT_QUIZZES.find(q => q.id === quizId);
+        const quiz = this.getQuizzes().find(q => q.id === quizId);
         if (!quiz) return;
 
         this.lastResultQuizId = quizId;
@@ -1498,17 +1512,18 @@
           verdictBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> COMPLETED &bull; RETEST AVAILABLE';
         }
 
-        document.getElementById('resultScoreHighlight').innerHTML = `${score}<span class="unit">/${quiz.totalMarks}</span>`;
+        const totalMarks = Number(quiz.totalMarks) || (quiz.questions.length * 2);
+        document.getElementById('resultScoreHighlight').innerHTML = `${score}<span class="unit">/${totalMarks}</span>`;
         document.getElementById('resultAccuracyHighlight').textContent = `${percent}% Accuracy`;
 
-        document.getElementById('statScoreEarned').textContent = `${score} / ${quiz.totalMarks}`;
+        document.getElementById('statScoreEarned').textContent = `${score} / ${totalMarks}`;
         document.getElementById('statAccuracyPercent').textContent = `${percent}%`;
 
         const proctorStat = document.getElementById('statProctorAudit');
         proctorStat.textContent = (violationsCount === 0) ? 'Clean (0 Strikes)' : `${violationsCount} Flagged`;
         proctorStat.style.color = (violationsCount === 0) ? 'var(--accent-green)' : 'var(--accent-red)';
 
-        document.getElementById('statPassThreshold').textContent = `${quiz.passMarks}% Benchmark`;
+        document.getElementById('statPassThreshold').textContent = `${quiz.passMarks || 50}% Benchmark`;
 
         // Populate Solutions Review List
         const solutionsListContainer = document.getElementById('resultSolutionsList');
@@ -1517,6 +1532,7 @@
         quiz.questions.forEach((q, idx) => {
           const userChoice = answers ? answers[q.id] : null;
           const isCorrect = (userChoice === q.correct);
+          const marks = q.marks || 2;
 
           const card = document.createElement('div');
           card.className = 'solution-card';
@@ -1528,13 +1544,13 @@
 
             if (opt.key === userChoice && isCorrect) {
               optClass = 'opt-correct';
-              pillHtml = '<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Your Choice &bull; Correct (+2)</span>';
+              pillHtml = `<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Your Choice &bull; Correct (+${marks})</span>`;
             } else if (opt.key === userChoice && !isCorrect) {
               optClass = 'opt-wrong';
               pillHtml = '<span class="solution-opt-pill pill-red"><i class="fas fa-times"></i> Your Choice &bull; Incorrect</span>';
             } else if (opt.key === q.correct) {
               optClass = 'opt-correct';
-              pillHtml = '<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Verified Correct Answer (+2)</span>';
+              pillHtml = `<span class="solution-opt-pill pill-green"><i class="fas fa-check"></i> Verified Correct Answer (+${marks})</span>`;
             }
 
             optionsHtml += `
@@ -1551,7 +1567,7 @@
           card.innerHTML = `
             <div class="solution-header">
               <span class="status-badge ${isCorrect ? 'badge-ready' : 'badge-alert'}">
-                QUESTION ${idx + 1} OF ${quiz.questions.length} &bull; ${isCorrect ? '+2 MARKS EARNED' : '0 MARKS'}
+                QUESTION ${idx + 1} OF ${quiz.questions.length} &bull; ${isCorrect ? `+${marks} MARKS EARNED` : '0 MARKS'}
               </span>
               <span style="font-size: 0.82rem; font-family: var(--font-code); color: ${isCorrect ? 'var(--accent-green)' : 'var(--accent-red)'}; font-weight: 700;">
                 ${isCorrect ? '<i class="fas fa-check-circle"></i> CORRECT' : (userChoice ? '<i class="fas fa-times-circle"></i> INCORRECT' : '<i class="fas fa-minus-circle"></i> UNANSWERED')}
