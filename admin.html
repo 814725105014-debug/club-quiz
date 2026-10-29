@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMBEDX Admin Control Center | Workshop Conduction & Proctoring</title>
+  <link rel="icon" type="image/png" href="assets/branding/embedx-logo-emblem.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+
+  <!-- Technical Workshop Question Bank -->
+  <script src="js/questions.js"></script>
+
+  <style>
+    .admin-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: rgba(14, 34, 76, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-cyan);
+    }
+
+    .kpi-value {
+      font-family: var(--font-code);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin: 0.5rem 0 0.2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="portal-header-inner">
+      <div class="brand-lockup">
+        <img src="assets/branding/srm-trp-logo-official.png" alt="SRM TRP" class="brand-logo"
+          onerror="this.src='assets/branding/srm-trp-logo.png'" />
+        <div class="brand-divider"></div>
+        <img src="assets/branding/embedx-logo-emblem.png" alt="EMBEDX" class="brand-logo" />
+        <div class="brand-text">
+          <span class="brand-title">ADMIN CONTROL CENTER</span>
+          <span class="brand-sub">Workshop Examination Switchboard & Live Proctoring</span>
+        </div>
+      </div>
+
+      <div class="header-actions" id="adminHeaderActions">
+        <button class="btn btn-secondary btn-sm" onclick="AdminPortal.openProjectorWindow()">
+          <i class="fas fa-tv" style="color: var(--accent-cyan);"></i> Open Projector Mode ↗
+        </button>
+        <button class="btn btn-danger btn-sm" id="adminLogoutBtn" onclick="AdminPortal.logout()" style="display: none;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+    <!-- AUTH GATE FOR ADMINS -->
+    <div id="adminAuthGate" class="glass-panel text-center" style="max-width: 480px; margin: 4rem auto; padding: 2.5rem 2rem;">
+      <div style="font-size: 3rem; color: var(--accent-amber); margin-bottom: 1rem;">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <h2 style="font-size: 1.6rem; margin-bottom: 0.5rem;">Organizer & Faculty Login</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Enter the workshop super-admin passkey to access live switchboards and proctoring.
+      </p>
+
+      <div class="form-group" style="text-align: left; margin-bottom: 1.25rem;">
+        <label class="form-label"><i class="fas fa-key"></i> Master Passkey</label>
+        <input type="password" id="adminPasskeyInput" class="form-control" placeholder="Enter Admin Passkey"
+          onkeypress="if(event.key === 'Enter') AdminPortal.verifyPasskey();" />
+        <small style="color: var(--text-muted); margin-top: 0.25rem; display: block;">Default key: <code>embedx@2025</code> or <code>trp@admin</code></small>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%;" onclick="AdminPortal.verifyPasskey()">
+        <i class="fas fa-unlock-alt"></i> Authenticate & Enter Dashboard
+      </button>
+    </div>
+
+    <!-- MAIN ADMIN CONTROL CENTER -->
+    <div id="adminDashboardView" style="display: none;">
+      <!-- Navigation Tabs -->
+      <div class="admin-nav">
+        <button class="tab-btn active" id="tabAdminSwitchboard" onclick="AdminPortal.switchTab('switchboard')">
+          <i class="fas fa-sliders-h"></i> Live Switchboard & Timers
+        </button>
+        <button class="tab-btn" id="tabAdminQuestions" onclick="AdminPortal.switchTab('questions')">
+          <i class="fas fa-question-circle"></i> Question Bank & Publishing
+        </button>
+        <button class="tab-btn" id="tabAdminProctor" onclick="AdminPortal.switchTab('proctor')">
+          <i class="fas fa-shield-alt"></i> Anti-Cheat Live Monitor
+        </button>
+        <button class="tab-btn" id="tabAdminResults" onclick="AdminPortal.switchTab('results')">
+          <i class="fas fa-poll"></i> Candidate Results & Export
+        </button>
+      </div>
+
+      <!-- KPI METRIC CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Registered Candidates</span>
+          <div class="kpi-value" id="kpiCandidatesCount">5</div>
+          <span style="font-size: 0.8rem; color: var(--accent-green);"><i class="fas fa-users"></i> I & II Year Active</span>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Workshop Submissions</span>
+          <div class="kpi-value" id="kpiSubmissionsCount">18</div>
+          <span style="font-size: 0.8rem; color: var(--accent-cyan);"><i class="fas fa-check-double"></i> All 5 Sessions</span>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Proctoring Violations</span>
+          <div class="kpi-value" id="kpiViolationsCount" style="color: var(--accent-red);">2</div>
+          <span style="font-size: 0.8rem; color: var(--accent-amber);"><i class="fas fa-exclamation-triangle"></i> Tab switch / blur flags</span>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Questions in Pool</span>
+          <div class="kpi-value" id="kpiQuestionsCount">25</div>
+          <span style="font-size: 0.8rem; color: var(--accent-blue);"><i class="fas fa-database"></i> 5 Modules Ready</span>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           TAB 1: LIVE WORKSHOP SWITCHBOARD
+           =================================================================== -->
+      <div id="sectionSwitchboard" class="tab-content active">
+        <!-- Live Toggles Grid -->
+        <h3 style="font-size: 1.3rem; margin-bottom: 1.25rem;">
+          <i class="fas fa-toggle-on" style="color: var(--accent-cyan);"></i> Live Workshop Conduction Switchboard
+        </h3>
+        
+        <div class="admin-switchboard">
+          <!-- Phase 1 Switch -->
+          <div class="switch-card" id="cardSwitchPhase1">
+            <div>
+              <span class="status-badge badge-p1" style="margin-bottom: 0.5rem;">SESSIONS 1 & 2</span>
+              <h4 style="font-size: 1.2rem; margin-bottom: 0.25rem;">Phase 1: Core Foundations</h4>
+              <p style="color: var(--text-muted); font-size: 0.85rem;" id="phase1DescStatus">Status: LIVE (Students can access Quiz 1 & 2)</p>
+            </div>
+            <button class="switch-toggle-btn active" id="btnTogglePhase1" onclick="AdminPortal.togglePhase(1)">
+            </button>
+          </div>
+
+          <!-- Phase 2 Switch -->
+          <div class="switch-card" id="cardSwitchPhase2">
+            <div>
+              <span class="status-badge badge-p2" style="margin-bottom: 0.5rem;">SESSIONS 3, 4 & 5</span>
+              <h4 style="font-size: 1.2rem; margin-bottom: 0.25rem;">Phase 2: Advanced Challenge</h4>
+              <p style="color: var(--text-muted); font-size: 0.85rem;" id="phase2DescStatus">Status: LOCKED (Awaiting manual activation)</p>
+            </div>
+            <button class="switch-toggle-btn" id="btnTogglePhase2" onclick="AdminPortal.togglePhase(2)">
+            </button>
+          </div>
+        </div>
+
+        <!-- Timer Duration & Broadcast Settings -->
+        <div class="grid-2">
+          <div class="glass-panel">
+            <h4 style="font-size: 1.15rem; margin-bottom: 1rem;"><i class="fas fa-stopwatch" style="color: var(--accent-cyan);"></i> Countdown Timer Duration Controller</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+              Set the allocated time in minutes for each technical assessment session.
+            </p>
+            <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+              <input type="number" id="quizDurationInput" class="form-control" style="width: 120px;" min="5" max="60" value="15" />
+              <span style="font-weight: 700; color: #FFFFFF;">Minutes</span>
+              <button class="btn btn-primary" onclick="AdminPortal.saveTimerDuration()">Save Duration</button>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="AdminPortal.setDurationPreset(10)">10 Mins</button>
+              <button class="btn btn-secondary btn-sm" onclick="AdminPortal.setDurationPreset(15)">15 Mins</button>
+              <button class="btn btn-secondary btn-sm" onclick="AdminPortal.setDurationPreset(20)">20 Mins</button>
+              <button class="btn btn-secondary btn-sm" onclick="AdminPortal.setDurationPreset(30)">30 Mins</button>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <h4 style="font-size: 1.15rem; margin-bottom: 1rem;"><i class="fas fa-bullhorn" style="color: var(--accent-amber);"></i> Emergency Workshop Broadcast</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+              Push an instant alert banner to every connected student screen in the seminar hall.
+            </p>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <input type="text" id="broadcastInput" class="form-control" placeholder="e.g. Attention: 5 minutes remaining! Submit your answers." />
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button class="btn btn-warning" onclick="AdminPortal.pushBroadcast()">
+                <i class="fas fa-paper-plane"></i> Broadcast Alert
+              </button>
+              <button class="btn btn-secondary" onclick="AdminPortal.clearBroadcast()">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projector Mode Shortcut Banner -->
+        <div class="card" style="margin-top: 2rem; border-color: var(--accent-cyan); background: linear-gradient(135deg, rgba(14,34,76,0.9), rgba(0,210,255,0.1)); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h4 style="font-size: 1.2rem; color: #FFFFFF; margin-bottom: 0.25rem;">
+              <i class="fas fa-projector" style="color: var(--accent-cyan);"></i> 5th Floor CSE Seminar Hall Projector Display
+            </h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">
+              Launch full-screen high-contrast live podium & rankings table designed exclusively for the auditorium screen.
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="AdminPortal.openProjectorWindow()">
+            <i class="fas fa-external-link-alt"></i> Launch Projector Mode ↗
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           TAB 2: QUESTION BANK & PUBLISHING
+           =================================================================== -->
+      <div id="sectionQuestions" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+          <h3 style="font-size: 1.3rem;">Question Bank Authoring & Manager</h3>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-primary btn-sm" onclick="AdminPortal.openAddQuestionModal()">
+              <i class="fas fa-plus"></i> Add New Question
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="AdminPortal.exportQuestionsJson()">
+              <i class="fas fa-download"></i> Export JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter by Quiz -->
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('ALL')">All (25)</button>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('QUIZ-01')">Quiz 1 (5)</button>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('QUIZ-02')">Quiz 2 (5)</button>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('QUIZ-03')">Quiz 3 (5)</button>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('QUIZ-04')">Quiz 4 (5)</button>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterQuestions('QUIZ-05')">Quiz 5 (5)</button>
+        </div>
+
+        <!-- Questions List Container -->
+        <div id="questionsListContainer" style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           TAB 3: ANTI-CHEAT LIVE PROCTORING MONITOR
+           =================================================================== -->
+      <div id="sectionProctor" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.25rem;">Real-Time Proctoring & Infraction Stream</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">
+              Audits tab switching, app switching, window blur, and fullscreen exit violations.
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="AdminPortal.exportProctoringCsv()">
+            <i class="fas fa-file-csv"></i> Download Audit CSV
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Candidate Name</th>
+                <th>Year</th>
+                <th>Assessment</th>
+                <th>Violation Type</th>
+                <th>Strike Level</th>
+                <th>Action Taken</th>
+              </tr>
+            </thead>
+            <tbody id="proctoringLogsTbody">
+              <tr>
+                <td style="font-family: var(--font-code); font-size: 0.85rem;">2026-10-29 14:15:22</td>
+                <td class="input-uppercase" style="font-weight: 700;">GAYATHRI ARUMUGAM</td>
+                <td><span class="status-badge badge-p1">II Year</span></td>
+                <td>QUIZ-03</td>
+                <td><span style="color: #F87171;">TAB_SWITCH_OR_MINIMIZE</span></td>
+                <td><span class="strike-badge strike-1">Strike 1/3</span></td>
+                <td>Warning modal alert</td>
+              </tr>
+              <tr>
+                <td style="font-family: var(--font-code); font-size: 0.85rem;">2026-10-29 14:18:40</td>
+                <td class="input-uppercase" style="font-weight: 700;">GAYATHRI ARUMUGAM</td>
+                <td><span class="status-badge badge-p1">II Year</span></td>
+                <td>QUIZ-03</td>
+                <td><span style="color: #F87171;">WINDOW_BLUR_OR_APP_SWITCH</span></td>
+                <td><span class="strike-badge strike-2">Strike 2/3</span></td>
+                <td>Final warning alert</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           TAB 4: CANDIDATE RESULTS & LEADERBOARD
+           =================================================================== -->
+      <div id="sectionResults" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.25rem;">Candidate Assessment Submissions</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">
+              Filter scores by Year of study or export full marksheet for academic records.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterResults('ALL')">All Candidates</button>
+            <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterResults('I Year')">I Year</button>
+            <button class="btn btn-secondary btn-sm" onclick="AdminPortal.filterResults('II Year')">II Year</button>
+            <button class="btn btn-success btn-sm" onclick="AdminPortal.exportResultsCsv()">
+              <i class="fas fa-file-excel"></i> Export Marksheet (CSV)
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Candidate Name</th>
+                <th>Year</th>
+                <th>Department</th>
+                <th>Q1</th>
+                <th>Q2</th>
+                <th>Q3</th>
+                <th>Q4</th>
+                <th>Q5</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableTbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ADD QUESTION MODAL -->
+  <div class="modal-backdrop" id="addQuestionModal">
+    <div class="modal-card" style="max-width: 620px;">
+      <h3 style="font-size: 1.4rem; margin-bottom: 1rem;"><i class="fas fa-plus-circle" style="color: var(--accent-cyan);"></i> Add New Examination Question</h3>
+      
+      <form id="newQuestionForm" onsubmit="event.preventDefault(); AdminPortal.saveNewQuestion();">
+        <div class="form-group">
+          <label class="form-label">Target Assessment</label>
+          <select id="modalQuestionQuizSelect" class="form-control" required>
+            <option value="QUIZ-01">QUIZ 1: Fundamentals of Embedded Systems (Phase 1)</option>
+            <option value="QUIZ-02">QUIZ 2: Microcontrollers, Sensors & Actuators (Phase 1)</option>
+            <option value="QUIZ-03">QUIZ 3: Embedded C & Firmware Programming (Phase 2)</option>
+            <option value="QUIZ-04">QUIZ 4: Programming & Interfacing I/O Devices (Phase 2)</option>
+            <option value="QUIZ-05">QUIZ 5: Hardware Interfacing & Serial Protocols (Phase 2)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea id="modalQuestionText" class="form-control" rows="3" required placeholder="Enter the technical question..."></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Option A</label>
+            <input type="text" id="modalOptA" class="form-control" required placeholder="Option A text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option B</label>
+            <input type="text" id="modalOptB" class="form-control" required placeholder="Option B text" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Option C</label>
+            <input type="text" id="modalOptC" class="form-control" required placeholder="Option C text" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Option D</label>
+            <input type="text" id="modalOptD" class="form-control" required placeholder="Option D text" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Correct Option</label>
+            <select id="modalCorrectOpt" class="form-control" required>
+              <option value="A">Option A</option>
+              <option value="B">Option B</option>
+              <option value="C">Option C</option>
+              <option value="D">Option D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marks</label>
+            <input type="number" id="modalMarks" class="form-control" value="2" readonly />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Explanation / Rationale</label>
+          <input type="text" id="modalExplanation" class="form-control" placeholder="Brief technical explanation for students after submission" />
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addQuestionModal').classList.remove('active')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Publish Question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const AdminPortal = {
+      authenticated: false,
+      quizzes: [],
+      adminConfig: {
+        phase1Active: true,
+        phase2Active: false,
+        quizDurationMinutes: 15,
+        broadcastMsg: ''
+      },
+
+      init() {
+        this.quizzes = (typeof DEFAULT_QUIZZES !== 'undefined') ? JSON.parse(JSON.stringify(DEFAULT_QUIZZES)) : [];
+        this.loadAdminConfig();
+
+        // Check if admin is remembered in session
+        if (sessionStorage.getItem('embedx_admin_auth') === 'true') {
+          this.authenticated = true;
+          this.showDashboard();
+        }
+      },
+
+      verifyPasskey() {
+        const input = document.getElementById('adminPasskeyInput').value.trim();
+        if (input === 'embedx@2025' || input === 'trp@admin' || input === 'embedx2025') {
+          this.authenticated = true;
+          sessionStorage.setItem('embedx_admin_auth', 'true');
+          this.showDashboard();
+        } else {
+          alert('Invalid admin passkey. Please check credentials.');
+        }
+      },
+
+      logout() {
+        sessionStorage.removeItem('embedx_admin_auth');
+        this.authenticated = false;
+        document.getElementById('adminAuthGate').style.display = 'block';
+        document.getElementById('adminDashboardView').style.display = 'none';
+        document.getElementById('adminLogoutBtn').style.display = 'none';
+      },
+
+      showDashboard() {
+        document.getElementById('adminAuthGate').style.display = 'none';
+        document.getElementById('adminDashboardView').style.display = 'block';
+        document.getElementById('adminLogoutBtn').style.display = 'inline-flex';
+
+        this.updateSwitchboardUI();
+        this.renderQuestionsList();
+        this.renderResultsTable();
+      },
+
+      loadAdminConfig() {
+        const saved = localStorage.getItem('embedx_admin_workshop_config');
+        if (saved) {
+          try {
+            this.adminConfig = Object.assign(this.adminConfig, JSON.parse(saved));
+          } catch (e) {}
+        }
+      },
+
+      saveAdminConfig() {
+        localStorage.setItem('embedx_admin_workshop_config', JSON.stringify(this.adminConfig));
+      },
+
+      updateSwitchboardUI() {
+        const btnP1 = document.getElementById('btnTogglePhase1');
+        const cardP1 = document.getElementById('cardSwitchPhase1');
+        const descP1 = document.getElementById('phase1DescStatus');
+
+        if (this.adminConfig.phase1Active) {
+          btnP1.classList.add('active');
+          cardP1.classList.add('active-phase');
+          descP1.textContent = 'Status: LIVE (Students can access Quiz 1 & 2)';
+        } else {
+          btnP1.classList.remove('active');
+          cardP1.classList.remove('active-phase');
+          descP1.textContent = 'Status: CLOSED (Access restricted)';
+        }
+
+        const btnP2 = document.getElementById('btnTogglePhase2');
+        const cardP2 = document.getElementById('cardSwitchPhase2');
+        const descP2 = document.getElementById('phase2DescStatus');
+
+        if (this.adminConfig.phase2Active) {
+          btnP2.classList.add('active');
+          cardP2.classList.add('active-phase');
+          descP2.textContent = 'Status: LIVE (Students can access Quiz 3, 4 & 5)';
+        } else {
+          btnP2.classList.remove('active');
+          cardP2.classList.remove('active-phase');
+          descP2.textContent = 'Status: LOCKED (Awaiting manual activation)';
+        }
+
+        document.getElementById('quizDurationInput').value = this.adminConfig.quizDurationMinutes || 15;
+      },
+
+      togglePhase(phaseNum) {
+        if (phaseNum === 1) {
+          this.adminConfig.phase1Active = !this.adminConfig.phase1Active;
+        } else if (phaseNum === 2) {
+          this.adminConfig.phase2Active = !this.adminConfig.phase2Active;
+        }
+        this.saveAdminConfig();
+        this.updateSwitchboardUI();
+      },
+
+      setDurationPreset(mins) {
+        this.adminConfig.quizDurationMinutes = mins;
+        this.saveAdminConfig();
+        this.updateSwitchboardUI();
+        alert(`Assessment duration set to ${mins} minutes for all candidates.`);
+      },
+
+      saveTimerDuration() {
+        const val = parseInt(document.getElementById('quizDurationInput').value, 10);
+        if (val >= 5 && val <= 60) {
+          this.adminConfig.quizDurationMinutes = val;
+          this.saveAdminConfig();
+          alert(`Timer duration successfully updated to ${val} minutes.`);
+        }
+      },
+
+      pushBroadcast() {
+        const msg = document.getElementById('broadcastInput').value.trim();
+        if (!msg) return;
+        this.adminConfig.broadcastMsg = msg;
+        this.saveAdminConfig();
+        alert(`Broadcast alert sent:\n\n"${msg}"`);
+      },
+
+      clearBroadcast() {
+        this.adminConfig.broadcastMsg = '';
+        this.saveAdminConfig();
+        document.getElementById('broadcastInput').value = '';
+        alert('Broadcast alert cleared.');
+      },
+
+      openProjectorWindow() {
+        window.open('projector.html', '_blank', 'noopener,noreferrer');
+      },
+
+      switchTab(tabId) {
+        document.querySelectorAll('.admin-nav .tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#adminDashboardView .tab-content').forEach(c => c.classList.remove('active'));
+
+        if (tabId === 'switchboard') {
+          document.getElementById('tabAdminSwitchboard').classList.add('active');
+          document.getElementById('sectionSwitchboard').classList.add('active');
+        } else if (tabId === 'questions') {
+          document.getElementById('tabAdminQuestions').classList.add('active');
+          document.getElementById('sectionQuestions').classList.add('active');
+          this.renderQuestionsList();
+        } else if (tabId === 'proctor') {
+          document.getElementById('tabAdminProctor').classList.add('active');
+          document.getElementById('sectionProctor').classList.add('active');
+        } else if (tabId === 'results') {
+          document.getElementById('tabAdminResults').classList.add('active');
+          document.getElementById('sectionResults').classList.add('active');
+          this.renderResultsTable();
+        }
+      },
+
+      renderQuestionsList(quizFilter) {
+        const container = document.getElementById('questionsListContainer');
+        container.innerHTML = '';
+
+        let count = 0;
+        this.quizzes.forEach(quiz => {
+          if (quizFilter && quizFilter !== 'ALL' && quiz.id !== quizFilter) return;
+
+          quiz.questions.forEach((q, qIndex) => {
+            count++;
+            const card = document.createElement('div');
+            card.className = 'glass-panel';
+            card.style.padding = '1.25rem';
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="status-badge ${quiz.phase === 'phase-1' ? 'badge-p1' : 'badge-p2'}">${quiz.id} &bull; Q${qIndex + 1}</span>
+                <span style="font-family: var(--font-code); color: var(--accent-green); font-size: 0.85rem;">Correct: Option (${q.correct})</span>
+              </div>
+              <h5 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: #FFFFFF;">${q.text}</h5>
+              <div class="grid-2" style="gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                <div>A) ${q.options[0] ? q.options[0].text : ''}</div>
+                <div>B) ${q.options[1] ? q.options[1].text : ''}</div>
+                <div>C) ${q.options[2] ? q.options[2].text : ''}</div>
+                <div>D) ${q.options[3] ? q.options[3].text : ''}</div>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--accent-cyan); border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                <strong>Explanation:</strong> ${q.exp || 'N/A'}
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        });
+
+        document.getElementById('kpiQuestionsCount').textContent = count;
+      },
+
+      filterQuestions(quizId) {
+        this.renderQuestionsList(quizId);
+      },
+
+      openAddQuestionModal() {
+        document.getElementById('addQuestionModal').classList.add('active');
+      },
+
+      saveNewQuestion() {
+        const quizId = document.getElementById('modalQuestionQuizSelect').value;
+        const text = document.getElementById('modalQuestionText').value.trim();
+        const optA = document.getElementById('modalOptA').value.trim();
+        const optB = document.getElementById('modalOptB').value.trim();
+        const optC = document.getElementById('modalOptC').value.trim();
+        const optD = document.getElementById('modalOptD').value.trim();
+        const correct = document.getElementById('modalCorrectOpt').value;
+        const exp = document.getElementById('modalExplanation').value.trim();
+
+        const targetQuiz = this.quizzes.find(q => q.id === quizId);
+        if (targetQuiz) {
+          const newQ = {
+            id: `Q${quizId.replace('QUIZ-0', '')}-${targetQuiz.questions.length + 1}`,
+            text: text,
+            options: [
+              { key: 'A', text: optA },
+              { key: 'B', text: optB },
+              { key: 'C', text: optC },
+              { key: 'D', text: optD }
+            ],
+            correct: correct,
+            exp: exp
+          };
+          targetQuiz.questions.push(newQ);
+          targetQuiz.totalMarks += 2;
+          alert(`Question successfully added to ${quizId}! Total questions: ${targetQuiz.questions.length}`);
+          document.getElementById('addQuestionModal').classList.remove('active');
+          document.getElementById('newQuestionForm').reset();
+          this.renderQuestionsList();
+        }
+      },
+
+      exportQuestionsJson() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.quizzes, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", "embedx_workshop_question_bank.json");
+        dlAnchor.click();
+      },
+
+      renderResultsTable(filterYear) {
+        const tbody = document.getElementById('resultsTableTbody');
+        tbody.innerHTML = '';
+
+        let contenders = [
+          { name: 'HARIHARAN V', year: 'II Year', dept: 'EEE', q1: 10, q2: 10, q3: 10, q4: 10, q5: 10, total: 50, status: 'PASSED' },
+          { name: 'RAMANATHAN S', year: 'I Year', dept: 'ECE', q1: 10, q2: 10, q3: 10, q4: 10, q5: 8, total: 48, status: 'PASSED' },
+          { name: 'NANTHAKISHORE J', year: 'II Year', dept: 'EEE', q1: 8, q2: 8, q3: 8, q4: 8, q5: 8, total: 40, status: 'PASSED' },
+          { name: 'VIMALA VARSHINI M', year: 'I Year', dept: 'CSE', q1: 8, q2: 8, q3: 8, q4: 8, q5: 6, total: 38, status: 'PASSED' },
+          { name: 'GAYATHRI ARUMUGAM', year: 'II Year', dept: 'AI&DS', q1: 10, q2: 10, q3: 10, q4: 0, q5: 0, total: 30, status: 'PASSED' }
+        ];
+
+        if (filterYear && filterYear !== 'ALL') {
+          contenders = contenders.filter(c => c.year === filterYear);
+        }
+
+        contenders.forEach((c, index) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>#${index + 1}</strong></td>
+            <td class="input-uppercase" style="font-weight: 700;">${c.name}</td>
+            <td><span class="status-badge badge-p1">${c.year}</span></td>
+            <td>${c.dept}</td>
+            <td>${c.q1}</td>
+            <td>${c.q2}</td>
+            <td>${c.q3}</td>
+            <td>${c.q4}</td>
+            <td>${c.q5}</td>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--accent-cyan);">${c.total}/50</td>
+            <td><span class="status-badge badge-done">${c.status}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      filterResults(year) {
+        this.renderResultsTable(year);
+      },
+
+      exportResultsCsv() {
+        let csv = 'Rank,Student Name,Year,Department,Q1,Q2,Q3,Q4,Q5,Total Marks,Status\n';
+        csv += '1,HARIHARAN V,II Year,EEE,10,10,10,10,10,50,PASSED\n';
+        csv += '2,RAMANATHAN S,I Year,ECE,10,10,10,10,8,48,PASSED\n';
+        csv += '3,NANTHAKISHORE J,II Year,EEE,8,8,8,8,8,40,PASSED\n';
+        csv += '4,VIMALA VARSHINI M,I Year,CSE,8,8,8,8,6,38,PASSED\n';
+        csv += '5,GAYATHRI ARUMUGAM,II Year,AI&DS,10,10,10,0,0,30,PASSED\n';
+
+        const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "embedx_workshop_results_marksheet.csv");
+        link.click();
+      },
+
+      exportProctoringCsv() {
+        let csv = 'Timestamp,Candidate Name,Year,Assessment,Violation Type,Strike Level,Action\n';
+        csv += '2026-10-29 14:15:22,GAYATHRI ARUMUGAM,II Year,QUIZ-03,TAB_SWITCH_OR_MINIMIZE,Strike 1/3,Warning alert\n';
+        csv += '2026-10-29 14:18:40,GAYATHRI ARUMUGAM,II Year,QUIZ-03,WINDOW_BLUR_OR_APP_SWITCH,Strike 2/3,Final warning\n';
+
+        const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "embedx_proctoring_audit_report.csv");
+        link.click();
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      AdminPortal.init();
+    });
+  </script>
+</body>
+
+</html>
+

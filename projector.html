@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMBEDX Workshop Live Leaderboard | 5th Floor CSE Seminar Hall Projector</title>
+  <link rel="icon" type="image/png" href="assets/branding/embedx-logo-emblem.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+
+  <style>
+    /* Cinema Projector 16:9 Optimization */
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+      background: #020617;
+    }
+
+    .projector-stage {
+      max-width: 1500px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Podium 3D Centerpiece */
+    .podium-gold-rank {
+      position: absolute;
+      top: -24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #FFC107;
+      color: #000;
+      font-family: var(--font-code);
+      font-weight: 800;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+      border: 3px solid #FFF;
+    }
+  </style>
+</head>
+
+<body class="projector-shell">
+  <div class="projector-stage">
+    <!-- PROJECTOR HEADER -->
+    <header class="projector-header">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <img src="assets/branding/srm-trp-logo-official.png" alt="SRM TRP College" style="height: 68px;"
+          onerror="this.src='assets/branding/srm-trp-logo.png'" />
+        <div style="width: 2px; height: 50px; background: rgba(0, 210, 255, 0.4);"></div>
+        <img src="assets/branding/embedx-logo-emblem.png" alt="EMBEDX" style="height: 60px;" />
+        <div>
+          <h1 class="projector-title">EMBEDX WORKSHOP LIVE LEADERBOARD</h1>
+          <p style="color: var(--accent-cyan); font-size: 1.05rem; letter-spacing: 0.05em; font-weight: 600;">
+            Basics of Embedded Systems & Embedded Programming Language &bull; 5th Floor CSE Seminar Hall
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Auto-Refresh Ticker & Controls -->
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="projector-ticker">
+          <i class="fas fa-sync-alt fa-spin" style="color: var(--accent-cyan);" id="refreshIcon"></i>
+          <span>Auto-refreshing in <strong id="tickerCountdown" style="color: var(--accent-cyan);">10s</strong></span>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div style="display: flex; gap: 0.4rem; background: rgba(14,34,76,0.6); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle);">
+          <button class="btn btn-primary btn-sm" id="btnFilterAll" onclick="ProjectorLeaderboard.filter('ALL')" style="border-radius: var(--radius-full); padding: 0.4rem 0.85rem;">All</button>
+          <button class="btn btn-secondary btn-sm" id="btnFilterI" onclick="ProjectorLeaderboard.filter('I Year')" style="border-radius: var(--radius-full); padding: 0.4rem 0.85rem;">I Year</button>
+          <button class="btn btn-secondary btn-sm" id="btnFilterII" onclick="ProjectorLeaderboard.filter('II Year')" style="border-radius: var(--radius-full); padding: 0.4rem 0.85rem;">II Year</button>
+        </div>
+
+        <button class="btn btn-secondary" onclick="ProjectorLeaderboard.toggleFullscreen()" title="Toggle Fullscreen">
+          <i class="fas fa-expand"></i> Fullscreen
+        </button>
+      </div>
+    </header>
+
+    <!-- TOP 3 PODIUM STAGE -->
+    <section class="podium-stage" id="podiumContainer">
+      <!-- 2nd Place Silver -->
+      <div class="podium-slot podium-silver">
+        <div class="podium-avatar">
+          <i class="fas fa-medal" style="color: #424242;"></i>
+        </div>
+        <div class="podium-block">
+          <div>
+            <div style="font-family: var(--font-code); color: #BDBDBD; font-weight: 700; font-size: 1rem;">2ND PLACE</div>
+            <div class="podium-name" id="podiumSilverName">RAMANATHAN S</div>
+            <div class="podium-year" id="podiumSilverYear">I Year &bull; ECE</div>
+          </div>
+          <div>
+            <div class="podium-score" id="podiumSilverScore">48 pts</div>
+            <div style="font-size: 0.8rem; color: #94A3B8;">5 Quizzes Passed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1st Place Gold -->
+      <div class="podium-slot podium-gold">
+        <div class="podium-gold-rank">1</div>
+        <div class="podium-avatar">
+          <i class="fas fa-trophy" style="color: #7A4F01;"></i>
+        </div>
+        <div class="podium-block">
+          <div>
+            <div style="font-family: var(--font-code); color: #FFC107; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em;">CHAMPION</div>
+            <div class="podium-name" id="podiumGoldName" style="font-size: 1.45rem;">HARIHARAN V</div>
+            <div class="podium-year" id="podiumGoldYear" style="color: #FFC107;">II Year &bull; EEE</div>
+          </div>
+          <div>
+            <div class="podium-score" id="podiumGoldScore" style="color: #FFD54F; font-size: 2.5rem;">50 pts</div>
+            <div style="font-size: 0.85rem; color: #FFF; font-weight: 700;">100% Perfection</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3rd Place Bronze -->
+      <div class="podium-slot podium-bronze">
+        <div class="podium-avatar">
+          <i class="fas fa-award" style="color: #FFF;"></i>
+        </div>
+        <div class="podium-block">
+          <div>
+            <div style="font-family: var(--font-code); color: #FCD34D; font-weight: 700; font-size: 1rem;">3RD PLACE</div>
+            <div class="podium-name" id="podiumBronzeName">NANTHAKISHORE J</div>
+            <div class="podium-year" id="podiumBronzeYear">II Year &bull; EEE</div>
+          </div>
+          <div>
+            <div class="podium-score" id="podiumBronzeScore">40 pts</div>
+            <div style="font-size: 0.8rem; color: #94A3B8;">4 Quizzes Passed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE RANKINGS TABLE (HIGH CONTRAST & DISTANCE READABILITY) -->
+    <div class="projector-table-wrap">
+      <table class="projector-table">
+        <thead>
+          <tr>
+            <th style="width: 100px; text-align: center;">Rank</th>
+            <th>Candidate Full Name</th>
+            <th>Year of Study</th>
+            <th>Department</th>
+            <th>Completed Modules</th>
+            <th style="text-align: right;">Total Score</th>
+          </tr>
+        </thead>
+        <tbody id="projectorTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Seminar Hall Footer Watermark -->
+    <footer style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.95rem;">
+      <div>
+        <i class="fas fa-map-marker-alt" style="color: var(--accent-cyan);"></i> 5th Floor CSE Seminar Hall &bull; Department of EEE & ECE &bull; SRM TRP Engineering College
+      </div>
+      <div>
+        Real-time proctored evaluation powered by <strong>EMBEDX Cloud Engine</strong>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const ProjectorLeaderboard = {
+      countdownSeconds: 10,
+      timerInterval: null,
+      currentFilter: 'ALL',
+
+      allContenders: [
+        { name: 'HARIHARAN V', year: 'II Year', dept: 'EEE', passed: 5, score: 50 },
+        { name: 'RAMANATHAN S', year: 'I Year', dept: 'ECE', passed: 5, score: 48 },
+        { name: 'NANTHAKISHORE J', year: 'II Year', dept: 'EEE', passed: 4, score: 40 },
+        { name: 'VIMALA VARSHINI M', year: 'I Year', dept: 'CSE', passed: 4, score: 38 },
+        { name: 'GAYATHRI ARUMUGAM', year: 'II Year', dept: 'AI&DS', passed: 3, score: 30 }
+      ],
+
+      init() {
+        this.loadLiveData();
+        this.render();
+        this.startTicker();
+      },
+
+      loadLiveData() {
+        // Check for any registered students in localStorage
+        const keys = Object.keys(localStorage);
+        keys.forEach(k => {
+          if (k.startsWith('embedx_student_')) {
+            try {
+              const student = JSON.parse(localStorage.getItem(k));
+              if (student && student.name) {
+                const existing = this.allContenders.find(c => c.name.toUpperCase() === student.name.toUpperCase());
+                const passedCount = student.passedQuizzes ? Object.keys(student.passedQuizzes).length : 0;
+                const score = student.totalScore || 0;
+
+                if (existing) {
+                  existing.score = score;
+                  existing.passed = passedCount;
+                  existing.year = student.year || existing.year;
+                  existing.dept = student.dept || existing.dept;
+                } else if (score > 0) {
+                  this.allContenders.push({
+                    name: student.name.toUpperCase(),
+                    year: student.year || 'I Year',
+                    dept: student.dept || 'EEE',
+                    passed: passedCount,
+                    score: score
+                  });
+                }
+              }
+            } catch (e) {}
+          }
+        });
+
+        // Sort descending by score
+        this.allContenders.sort((a, b) => b.score - a.score);
+      },
+
+      render() {
+        let list = [...this.allContenders];
+        if (this.currentFilter !== 'ALL') {
+          list = list.filter(c => c.year === this.currentFilter);
+        }
+
+        // Render Podium
+        const gold = list[0] || { name: '—', year: '—', score: 0, passed: 0 };
+        const silver = list[1] || { name: '—', year: '—', score: 0, passed: 0 };
+        const bronze = list[2] || { name: '—', year: '—', score: 0, passed: 0 };
+
+        document.getElementById('podiumGoldName').textContent = gold.name;
+        document.getElementById('podiumGoldYear').textContent = `${gold.year} • ${gold.dept || ''}`;
+        document.getElementById('podiumGoldScore').textContent = `${gold.score} pts`;
+
+        document.getElementById('podiumSilverName').textContent = silver.name;
+        document.getElementById('podiumSilverYear').textContent = `${silver.year} • ${silver.dept || ''}`;
+        document.getElementById('podiumSilverScore').textContent = `${silver.score} pts`;
+
+        document.getElementById('podiumBronzeName').textContent = bronze.name;
+        document.getElementById('podiumBronzeYear').textContent = `${bronze.year} • ${bronze.dept || ''}`;
+        document.getElementById('podiumBronzeScore').textContent = `${bronze.score} pts`;
+
+        // Render Table
+        const tbody = document.getElementById('projectorTableBody');
+        tbody.innerHTML = '';
+
+        list.forEach((c, index) => {
+          const rank = index + 1;
+          const tr = document.createElement('tr');
+          if (rank === 1) tr.className = 'rank-1';
+          else if (rank === 2) tr.className = 'rank-2';
+          else if (rank === 3) tr.className = 'rank-3';
+
+          tr.innerHTML = `
+            <td style="text-align: center;">
+              <span class="projector-rank-pill">#${rank}</span>
+            </td>
+            <td>
+              <span class="input-uppercase" style="font-weight: 800; font-size: 1.35rem; letter-spacing: 0.04em;">${c.name}</span>
+            </td>
+            <td>
+              <span class="status-badge badge-p1" style="font-size: 0.95rem; padding: 0.4rem 0.85rem;">${c.year}</span>
+            </td>
+            <td style="font-weight: 600; color: #CBD5E1;">${c.dept || 'Engineering'}</td>
+            <td>
+              <span style="color: var(--accent-green); font-weight: 700; font-size: 1.15rem;">${c.passed} / 5</span> Passed
+            </td>
+            <td style="text-align: right;">
+              <span class="projector-score-value">${c.score} pts</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      filter(year) {
+        this.currentFilter = year;
+        document.getElementById('btnFilterAll').className = (year === 'ALL') ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+        document.getElementById('btnFilterI').className = (year === 'I Year') ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+        document.getElementById('btnFilterII').className = (year === 'II Year') ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+        this.render();
+      },
+
+      startTicker() {
+        clearInterval(this.timerInterval);
+        const ticker = document.getElementById('tickerCountdown');
+        this.countdownSeconds = 10;
+
+        this.timerInterval = setInterval(() => {
+          this.countdownSeconds--;
+          ticker.textContent = `${this.countdownSeconds}s`;
+
+          if (this.countdownSeconds <= 0) {
+            this.countdownSeconds = 10;
+            this.loadLiveData();
+            this.render();
+          }
+        }, 1000);
+      },
+
+      toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ProjectorLeaderboard.init();
+    });
+  </script>
+</body>
+
+</html>
+

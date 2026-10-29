@@ -1,0 +1,22 @@
+{
+  "name": "embedx-quiz-platform",
+  "version": "2.0.0",
+  "description": "Standalone Technical Examination & Certification Platform with Live Anti-Cheat Proctoring, Admin Conduction Switchboard & Auditorium Projector Mode for SRM TRP Engineering College (Autonomous)",
+  "main": "index.html",
+  "scripts": {
+    "deploy": "firebase deploy --only hosting",
+    "test": "node js/questions.js"
+  },
+  "keywords": [
+    "embedded-systems",
+    "quiz-platform",
+    "anti-cheat",
+    "proctoring",
+    "firebase-hosting",
+    "leaderboard",
+    "srm-trp"
+  ],
+  "author": "EMBEDX & SRM TRP Engineering College",
+  "license": "MIT"
+}
+
