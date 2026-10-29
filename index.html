@@ -119,6 +119,15 @@
               <span id="dashCompletedCount">0/5</span> Quizzes Completed &bull; 
               Total Score: <strong style="color: var(--accent-cyan);" id="dashTotalScore">0</strong> pts
             </p>
+            <div style="margin-top: 0.75rem; max-width: 450px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">
+                <span>Workshop Milestone Progress</span>
+                <span id="dashProgressPct" style="color: var(--accent-cyan); font-weight: 700;">0% Completed</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden;">
+                <div id="dashOverallProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green)); box-shadow: 0 0 10px rgba(0,210,255,0.5); transition: width 0.4s ease;"></div>
+              </div>
+            </div>
           </div>
           <div style="display: flex; gap: 0.75rem;">
             <button class="btn btn-secondary btn-sm" onclick="StudentApp.openEditProfileModal()">
@@ -282,32 +291,45 @@
     <div id="examPlayerSection" style="display: none;">
       <!-- Sticky Proctoring Header Bar -->
       <div class="proctor-bar">
-        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <span class="status-badge badge-p1" id="examQuizIdBadge">QUIZ-01</span>
-          <span style="font-weight: 700; font-size: 1.05rem;" id="examQuizTitle">Fundamentals of Embedded Systems</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="status-badge badge-p1" id="examQuizIdBadge">QUIZ-01</span>
+            <span style="font-weight: 700; font-size: 1.05rem;" id="examQuizTitle">Fundamentals of Embedded Systems</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <!-- Live Timer -->
+            <div class="timer-display">
+              <i class="fas fa-stopwatch"></i> <span id="examTimerDisplay">15:00</span>
+            </div>
+            <!-- Anti-Cheat Strike Indicator -->
+            <div class="strike-badge strike-0" id="examStrikeBadge">
+              <i class="fas fa-shield-alt"></i> Violations: <span id="examViolationCount">0</span>/3
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="StudentApp.cancelExamConfirm()" title="Exit Exam">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <!-- Live Timer -->
-          <div class="timer-display">
-            <i class="fas fa-stopwatch"></i> <span id="examTimerDisplay">15:00</span>
-          </div>
-          <!-- Anti-Cheat Strike Indicator -->
-          <div class="strike-badge strike-0" id="examStrikeBadge">
-            <i class="fas fa-shield-alt"></i> Violations: <span id="examViolationCount">0</span>/3
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="StudentApp.cancelExamConfirm()" title="Exit Exam">
-            <i class="fas fa-times"></i>
-          </button>
+        <!-- Linear Exam Progress Track -->
+        <div class="exam-progress-track">
+          <div class="exam-progress-fill" id="examProgressFill" style="width: 20%;"></div>
         </div>
       </div>
 
       <!-- Question Player Card -->
-      <div class="glass-panel" style="margin-top: 1.5rem; padding: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-subtle);">
-          <span style="font-family: var(--font-code); color: var(--accent-cyan); font-weight: 700; font-size: 1.1rem;" id="examQuestionTracker">
-            Question 1 of 5
-          </span>
-          <span style="font-size: 0.85rem; color: var(--text-muted);">Single Choice &bull; +2 Marks</span>
+      <div class="glass-panel" style="margin-top: 1rem; padding: 2rem;">
+        <!-- Top Question Header & Navigation Palette Ribbon -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <span style="font-family: var(--font-code); color: var(--accent-cyan); font-weight: 700; font-size: 1.1rem;" id="examQuestionTracker">
+              Question 1 of 5
+            </span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;">Single Choice &bull; +2 Marks</span>
+          </div>
+          <!-- Question Quick Jump Palette Ribbon -->
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;" id="examPaletteContainer">
+            <!-- Dynamically populated palette buttons -->
+          </div>
         </div>
 
         <!-- Question Text -->
@@ -321,7 +343,7 @@
         </div>
 
         <!-- Question Navigation & Action Dock -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
+        <div class="exam-action-dock" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn btn-secondary" id="btnPrevQuestion" onclick="StudentApp.prevQuestion()">
               <i class="fas fa-arrow-left"></i> Previous
@@ -338,14 +360,6 @@
             <button class="btn btn-success" id="btnSubmitExam" onclick="StudentApp.submitExamConfirm()">
               <i class="fas fa-check-circle"></i> Submit Examination
             </button>
-          </div>
-        </div>
-
-        <!-- Question Quick Jump Palette -->
-        <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-subtle);">
-          <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.75rem;">Question Jump Palette:</span>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="examPaletteContainer">
-            <!-- Dynamically populated palette buttons -->
           </div>
         </div>
       </div>
@@ -497,7 +511,22 @@
         this.initFirebase();
         this.loadAdminConfig();
         this.setupAntiCheatProctor();
+        this.setupKeyboardNavigation();
         this.checkExistingSession();
+      },
+
+      setupKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+          if (!this.examInProgress) return;
+          if (e.key === 'ArrowRight') this.nextQuestion();
+          if (e.key === 'ArrowLeft') this.prevQuestion();
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const keys = ['A', 'B', 'C', 'D'];
+            const optKey = keys[parseInt(e.key, 10) - 1];
+            const q = this.activeQuiz.questions[this.currentQuestionIndex];
+            if (q) this.selectAnswer(q.id, optKey);
+          }
+        });
       },
 
       initFirebase() {
@@ -641,6 +670,11 @@
 
         const passedCount = Object.keys(this.user.passedQuizzes || {}).length;
         document.getElementById('dashCompletedCount').textContent = `${passedCount}/5`;
+        const pct = Math.round((passedCount / 5) * 100);
+        const pEl = document.getElementById('dashProgressPct');
+        if (pEl) pEl.textContent = `${pct}% Completed`;
+        const barEl = document.getElementById('dashOverallProgressBar');
+        if (barEl) barEl.style.width = `${pct}%`;
 
         this.renderPhaseCards();
         this.renderQuizCards();
@@ -843,6 +877,10 @@
         document.getElementById('examQuestionTracker').textContent = `Question ${this.currentQuestionIndex + 1} of ${quiz.questions.length}`;
         document.getElementById('examQuestionText').textContent = q.text;
 
+        const progressPct = Math.round(((this.currentQuestionIndex + 1) / quiz.questions.length) * 100);
+        const progressFill = document.getElementById('examProgressFill');
+        if (progressFill) progressFill.style.width = `${progressPct}%`;
+
         const optionsContainer = document.getElementById('examOptionsContainer');
         optionsContainer.innerHTML = '';
 
@@ -855,8 +893,9 @@
             <input type="radio" name="opt_${q.id}" value="${opt.key}" ${selectedOption === opt.key ? 'checked' : ''} 
               onchange="StudentApp.selectAnswer('${q.id}', '${opt.key}')" />
             <div style="flex: 1;">
-              <strong style="color: var(--accent-cyan); margin-right: 0.5rem;">(${opt.key})</strong> ${opt.text}
+              <strong style="color: var(--accent-cyan); margin-right: 0.5rem; font-family: var(--font-code);">(${opt.key})</strong> ${opt.text}
             </div>
+            ${selectedOption === opt.key ? '<span class="status-badge badge-p1" style="font-size: 0.72rem; padding: 0.2rem 0.55rem;"><i class="fas fa-check"></i> SELECTED</span>' : ''}
           `;
           optionsContainer.appendChild(item);
         });
@@ -907,11 +946,7 @@
         this.activeQuiz.questions.forEach((q, idx) => {
           const btn = document.createElement('button');
           btn.id = `paletteBtn_${idx}`;
-          btn.className = 'btn btn-secondary btn-sm';
-          btn.style.width = '36px';
-          btn.style.height = '36px';
-          btn.style.padding = '0';
-          btn.style.borderRadius = '50%';
+          btn.className = 'palette-btn';
           btn.textContent = idx + 1;
           btn.onclick = () => this.jumpToQuestion(idx);
           container.appendChild(btn);
@@ -925,20 +960,12 @@
           const btn = document.getElementById(`paletteBtn_${idx}`);
           if (!btn) return;
 
+          btn.className = 'palette-btn';
           if (idx === this.currentQuestionIndex) {
-            btn.style.borderColor = 'var(--accent-cyan)';
-            btn.style.boxShadow = '0 0 10px rgba(0,210,255,0.4)';
-          } else {
-            btn.style.borderColor = 'transparent';
-            btn.style.boxShadow = 'none';
+            btn.classList.add('active');
           }
-
           if (this.userAnswers[q.id]) {
-            btn.style.background = 'var(--accent-green)';
-            btn.style.color = '#FFFFFF';
-          } else {
-            btn.style.background = 'rgba(255,255,255,0.1)';
-            btn.style.color = '#94A3B8';
+            btn.classList.add('answered');
           }
         });
       },
