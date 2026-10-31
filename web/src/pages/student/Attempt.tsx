@@ -248,6 +248,11 @@ export default function AttemptPage() {
       e.preventDefault();
       void recordViolation('context_menu');
     };
+    const onFullscreenChange = () => {
+      // Logged, not blocked: browsers cannot force fullscreen on mobile, and the
+      // exit may be an OS-level gesture we are not allowed to intercept.
+      if (!document.fullscreenElement) void recordViolation('fullscreen_exit');
+    };
     const onCopy = (e: ClipboardEvent) => {
       void recordViolation('clipboard_copy', { target: (e.target as HTMLElement)?.tagName });
     };
@@ -259,6 +264,7 @@ export default function AttemptPage() {
       }
     };
 
+    document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('blur', onBlur);
     document.addEventListener('contextmenu', onContextMenu);
@@ -266,6 +272,7 @@ export default function AttemptPage() {
     document.addEventListener('paste', onPaste);
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onBlur);
       document.removeEventListener('contextmenu', onContextMenu);

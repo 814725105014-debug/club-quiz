@@ -65,6 +65,11 @@ export const env = {
     verifyBaseUrl: str('CERT_VERIFY_BASE_URL', `${str('APP_BASE_URL', 'http://localhost:4000')}/verify`),
     emailFrom: str('CERT_EMAIL_FROM', str('ADMIN_EMAIL', 'admin@example.com')),
     emailFromName: str('CERT_EMAIL_FROM_NAME', 'SRM TRP Engineering College'),
+    // Text printed over the three signature lines in the template. Leave empty when the
+    // template already contains scanned signature images.
+    signatureCoordinator: str('CERT_SIGNATURE_COORDINATOR', ''),
+    signatureHod: str('CERT_SIGNATURE_HOD', ''),
+    signaturePrincipal: str('CERT_SIGNATURE_PRINCIPAL', ''),
   },
   email: {
     testMode: bool('EMAIL_TEST_MODE', true),

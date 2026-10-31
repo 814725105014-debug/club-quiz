@@ -219,6 +219,7 @@ export class AppsScriptProvider implements GoogleProvider {
         percentage: input.percentage,
         passed: input.passed,
         spreadsheetId: cfg.spreadsheetId,
+        qrPngBase64: (await QRCode.toBuffer(input.verifyUrl, { width: 600, margin: 1 })).toString('base64'),
       },
       cfg,
     );
@@ -394,6 +395,9 @@ export class GoogleApiProvider implements GoogleProvider {
       '{{SCORE}}': `${input.score} / ${input.totalMarks}`,
       '{{PERCENTAGE}}': `${input.percentage.toFixed(2)}%`,
       '{{CERTIFICATE_ID}}': input.certificateId,
+      '{{COORDINATOR_SIGNATURE}}': env.workspace.signatureCoordinator,
+      '{{HOD_SIGNATURE}}': env.workspace.signatureHod,
+      '{{PRINCIPAL_SIGNATURE}}': env.workspace.signaturePrincipal,
       '{{QR_CODE}}': '',
     };
 

@@ -2,7 +2,7 @@
   "name": "quiz-platform",
   "version": "3.0.0",
   "private": true,
-  "description": "QUIZ PLATFORM — mobile-first quiz delivery, live hosting, Google Sheets sync, Slides certificate generation and Gmail delivery for SRM TRP Engineering College (Autonomous)",
+  "description": "QUIZ PLATFORM \u2014 mobile-first quiz delivery, live hosting, Google Sheets sync, Slides certificate generation and Gmail delivery for SRM TRP Engineering College (Autonomous)",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -15,7 +15,7 @@
     "build:web": "vite build",
     "start": "node dist/server/index.js",
     "test": "node --import tsx --test server/test/*.test.ts",
-    "test:legacy": "node tests/standalone_tests.js",
+    "test:legacy": "node legacy/tests/standalone_tests.js",
     "seed": "tsx server/src/seed.ts",
     "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit"
   },
