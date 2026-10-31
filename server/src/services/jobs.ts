@@ -6,7 +6,8 @@ export type JobType =
   | 'sheet_sync_result'
   | 'sheet_sync_certificate'
   | 'issue_certificate'
-  | 'send_email';
+  | 'send_email'
+  | 'firestore_mirror';
 
 export interface JobRecord {
   id: string;

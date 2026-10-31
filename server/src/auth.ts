@@ -5,6 +5,8 @@ import { env } from './env.js';
 import { getDb } from './db.js';
 import { ApiError } from './lib/http.js';
 import { newId, randomToken } from './lib/ids.js';
+import { firebaseAdminConfigured, verifyFirebaseIdToken } from './services/firebase.js';
+import { recordAudit } from './audit.js';
 
 export type Role = 'super_admin' | 'quiz_admin' | 'quiz_host' | 'results_viewer';
 
@@ -139,14 +141,98 @@ export function authenticate(req: Request): AdminUser | undefined {
   }
 }
 
-export function requireAuth(req: Request, _res: Response, next: NextFunction): void {
-  const user = authenticate(req);
-  if (!user) {
-    next(new ApiError(401, 'Authentication required. Please sign in.', 'unauthenticated'));
-    return;
+/* ------------------------------------------------------------------ */
+/* Firebase Authentication (AUTH_MODE=firebase)                        */
+/* ------------------------------------------------------------------ */
+
+export function bearerToken(req: Request): string | undefined {
+  const header = req.headers.authorization;
+  if (!header) return undefined;
+  const [scheme, value] = header.split(' ');
+  if (!/^Bearer$/i.test(scheme ?? '') || !value) return undefined;
+  return value.trim() || undefined;
+}
+
+/**
+ * Maps a verified Firebase identity onto an administrator row. The row stays
+ * authoritative for role and activation, and the Firebase uid is bound on first use so
+ * later sign-ins resolve without an email lookup.
+ */
+function bindFirebaseIdentity(
+  req: Request,
+  decoded: { uid: string; email?: string; name?: string; firebase?: { sign_in_provider?: string } },
+): AdminUser {
+  const db = getDb();
+  const columns = 'id, email, name, role, is_active, firebase_uid';
+  interface AdminRow {
+    id: string;
+    email: string;
+    name: string;
+    role: Role;
+    is_active: number;
+    firebase_uid: string | null;
   }
-  req.admin = user;
-  next();
+  let user = db.prepare(`SELECT ${columns} FROM users WHERE firebase_uid = ?`).get(decoded.uid) as
+    | AdminRow
+    | undefined;
+
+  const email = decoded.email?.trim().toLowerCase();
+  if (!user && email) {
+    user = db.prepare(`SELECT ${columns} FROM users WHERE lower(email) = ?`).get(email) as AdminRow | undefined;
+    if (user && !user.firebase_uid) {
+      db.prepare('UPDATE users SET firebase_uid = ?, auth_provider = ? WHERE id = ?').run(
+        decoded.uid,
+        decoded.firebase?.sign_in_provider ?? 'firebase',
+        user.id,
+      );
+      db.prepare('UPDATE users SET last_login_at = ? WHERE id = ?').run(new Date().toISOString(), user.id);
+      recordAudit(req, 'auth.firebase_bind', 'user', user.id, {
+        provider: decoded.firebase?.sign_in_provider ?? 'firebase',
+      });
+    }
+  }
+
+  if (!user) {
+    throw new ApiError(
+      403,
+      'This Google account is not registered as an administrator. Ask a super administrator to add your email under Team & access.',
+      'not_provisioned',
+    );
+  }
+  if (!user.is_active) {
+    throw new ApiError(403, 'This administrator account has been deactivated.', 'account_disabled');
+  }
+  return { id: user.id, email: user.email, name: user.name, role: user.role };
+}
+
+export async function authenticateAsync(req: Request): Promise<AdminUser | undefined> {
+  const token = bearerToken(req);
+  if (env.firebase.mode === 'firebase') {
+    if (!token) return undefined;
+    if (!firebaseAdminConfigured()) {
+      throw new ApiError(
+        503,
+        'Firebase sign-in is enabled but the API has no service account configured (FIREBASE_SERVICE_ACCOUNT_FILE).',
+        'firebase_not_configured',
+      );
+    }
+    const decoded = await verifyFirebaseIdToken(token);
+    return bindFirebaseIdentity(req, decoded);
+  }
+  return authenticate(req);
+}
+
+export function requireAuth(req: Request, _res: Response, next: NextFunction): void {
+  authenticateAsync(req)
+    .then((user) => {
+      if (!user) {
+        next(new ApiError(401, 'Authentication required. Please sign in.', 'unauthenticated'));
+        return;
+      }
+      req.admin = user;
+      next();
+    })
+    .catch(next);
 }
 
 export function requireRole(minimum: Role) {

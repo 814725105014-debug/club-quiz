@@ -1,4 +1,5 @@
 import { getDb } from '../db.js';
+import { queueMirror } from './firestoreMirror.js';
 import { newId } from '../lib/ids.js';
 import { nowIso } from '../lib/time.js';
 import type { AttemptRow, CertificateRow, ParticipantRow, QuizRow } from '../domain.js';
@@ -159,11 +160,13 @@ export async function processCertificateIssue(certificateRowId: string): Promise
       db.prepare(`UPDATE certificates SET email_status = 'skipped' WHERE id = ?`).run(cert.id);
     }
     enqueueJob('sheet_sync_result', { attemptId: cert.attempt_id });
+    queueMirror('certificate', cert.id);
   } catch (err) {
     const message = (err as Error).message.slice(0, 1500);
     db.prepare(
       `UPDATE certificates SET status = 'failed', error = ?, email_status = 'failed', email_error = ?, updated_at = ? WHERE id = ?`,
     ).run(message, message, nowIso(), cert.id);
+    queueMirror('certificate', cert.id);
     throw err;
   }
 }

@@ -65,11 +65,29 @@ export const env = {
     verifyBaseUrl: str('CERT_VERIFY_BASE_URL', `${str('APP_BASE_URL', 'http://localhost:4000')}/verify`),
     emailFrom: str('CERT_EMAIL_FROM', str('ADMIN_EMAIL', 'admin@example.com')),
     emailFromName: str('CERT_EMAIL_FROM_NAME', 'SRM TRP Engineering College'),
-    // Text printed over the three signature lines in the template. Leave empty when the
-    // template already contains scanned signature images.
-    signatureCoordinator: str('CERT_SIGNATURE_COORDINATOR', ''),
-    signatureHod: str('CERT_SIGNATURE_HOD', ''),
-    signaturePrincipal: str('CERT_SIGNATURE_PRINCIPAL', ''),
+  },
+  firebase: {
+    /**
+     * cookie   -> the platform's own scrypt + signed-cookie sessions (default, works offline)
+     * firebase -> verify Firebase ID tokens on every admin request (email/password, Google, phone)
+     */
+    mode: (str('AUTH_MODE', 'cookie') === 'firebase' ? 'firebase' : 'cookie') as 'cookie' | 'firebase',
+    projectId: str('FIREBASE_PROJECT_ID', 'embedx-assessment'),
+    // Public web-app identifiers (safe to ship to the browser; access is governed by rules + claims).
+    web: {
+      apiKey: str('FIREBASE_API_KEY', 'AIzaSyACO6JtEgvD_n5m5haPV-0y91Z76UI9C18'),
+      authDomain: str('FIREBASE_AUTH_DOMAIN', 'embedx-assessment.firebaseapp.com'),
+      projectId: str('FIREBASE_PROJECT_ID', 'embedx-assessment'),
+      storageBucket: str('FIREBASE_STORAGE_BUCKET', 'embedx-assessment.firebasestorage.app'),
+      messagingSenderId: str('FIREBASE_MESSAGING_SENDER_ID', '803481654330'),
+      appId: str('FIREBASE_APP_ID', '1:803481654330:web:3bd07cd5cf42c4de1e5103'),
+      measurementId: str('FIREBASE_MEASUREMENT_ID', 'G-S94VH65XXC'),
+    },
+    // Server-side credentials. Either the JSON itself (secret manager) or a file path.
+    serviceAccountJson: str('FIREBASE_SERVICE_ACCOUNT_JSON', ''),
+    serviceAccountFile: str('FIREBASE_SERVICE_ACCOUNT_FILE', ''),
+    /** Mirror domain records into Firestore so the project's database stays in sync. */
+    mirror: bool('FIRESTORE_MIRROR', false),
   },
   email: {
     testMode: bool('EMAIL_TEST_MODE', true),

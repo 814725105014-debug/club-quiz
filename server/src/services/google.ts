@@ -9,6 +9,19 @@ import { getWorkspaceConfig, type WorkspaceConfig } from './config.js';
 import { formatDate } from '../lib/time.js';
 import { randomCode } from '../lib/ids.js';
 
+/**
+ * Placeholders that mark the signature block of the college template. The whole block is
+ * removed from every generated copy (option b: no signature area at all) — the template
+ * itself is never modified.
+ */
+const SIGNATURE_TOKENS = ['{{COORDINATOR_SIGNATURE}}', '{{HOD_SIGNATURE}}', '{{PRINCIPAL_SIGNATURE}}'];
+
+/** Vertical slack when deciding which neighbouring shapes belong to the signature block. */
+const SIGNATURE_BAND_PAD_EMU = 400_000;
+
+/** Placeholders that must never be deleted while clearing the signature block. */
+const PROTECTED_TOKENS = ['{{NAME}}', '{{COURSE_NAME}}', '{{ISSUE_DATE}}', '{{QR_CODE}}', '{{CERTIFICATE_ID}}'];
+
 export interface CertificateInput {
   certificateId: string;
   participant: { name: string; email: string; regNumber?: string | null; department?: string | null };
@@ -395,65 +408,110 @@ export class GoogleApiProvider implements GoogleProvider {
       '{{SCORE}}': `${input.score} / ${input.totalMarks}`,
       '{{PERCENTAGE}}': `${input.percentage.toFixed(2)}%`,
       '{{CERTIFICATE_ID}}': input.certificateId,
-      '{{COORDINATOR_SIGNATURE}}': env.workspace.signatureCoordinator,
-      '{{HOD_SIGNATURE}}': env.workspace.signatureHod,
-      '{{PRINCIPAL_SIGNATURE}}': env.workspace.signaturePrincipal,
       '{{QR_CODE}}': '',
     };
 
-    const requests: Record<string, unknown>[] = Object.entries(replacements).map(([text, replaceText]) => ({
-      replaceAllText: { containsText: { text, matchCase: true }, replaceText },
-    }));
+    const requests: Record<string, unknown>[] = Object.entries(replacements)
+      .filter(([token]) => !SIGNATURE_TOKENS.includes(token))
+      .map(([text, replaceText]) => ({ replaceAllText: { containsText: { text, matchCase: true }, replaceText } }));
 
-    // Insert the verification QR image over the {{QR_CODE}} placeholder before it is cleared.
-    const qrBuffer = await QRCode.toBuffer(input.verifyUrl, { margin: 1, width: 420 });
-    let qrObjectId: string | undefined;
-    try {
-      const pres = await slides.presentations.get({
-        presentationId: slideFileId,
-        fields: 'slides(objectId,pageElements(objectId,size,transform,shape(text(textElements(textRun(content))))))',
-      });
+    const pres = await slides.presentations.get({
+      presentationId: slideFileId,
+      fields: 'slides(objectId,pageElements(objectId,size,transform,shape(text(textElements(textRun(content))))))',
+    });
+
+    type Element = NonNullable<NonNullable<typeof pres.data.slides>[number]['pageElements']>[number];
+    const elementText = (el: Element) =>
+      (el.shape?.text?.textElements ?? []).map((te) => te.textRun?.content ?? '').join('');
+    const elementTop = (el: Element) => el.transform?.translateY ?? 0;
+    const elementBottom = (el: Element) => elementTop(el) + (el.size?.height?.magnitude ?? 0);
+
+    // Locate the signature tokens and the QR placeholder on the copy (not the template).
+    const signatureIds = new Set<string>();
+    const signatureShapes: Element[] = [];
+    let qrShape: Element | undefined;
+    let qrSlideId: string | undefined;
+    let bandTop = Number.POSITIVE_INFINITY;
+    let bandBottom = Number.NEGATIVE_INFINITY;
+
+    for (const slide of pres.data.slides ?? []) {
+      for (const el of slide.pageElements ?? []) {
+        const text = elementText(el);
+        if (text.includes('{{QR_CODE}}')) {
+          qrShape = el;
+          qrSlideId = slide.objectId ?? undefined;
+        }
+        if (SIGNATURE_TOKENS.some((token) => text.includes(token))) {
+          signatureIds.add(el.objectId as string);
+          signatureShapes.push(el);
+          bandTop = Math.min(bandTop, elementTop(el));
+          bandBottom = Math.max(bandBottom, elementBottom(el));
+        }
+      }
+    }
+
+    if (signatureShapes.length) {
+      // Swallow the labels and rules that sit beside the tokens, but never a shape that
+      // still carries a placeholder we need (name, course, date, QR, certificate id).
       for (const slide of pres.data.slides ?? []) {
         for (const el of slide.pageElements ?? []) {
-          const text = (el.shape?.text?.textElements ?? [])
-            .map((te) => te.textRun?.content ?? '')
-            .join('');
-          if (text.includes('{{QR_CODE}}')) {
-            const qrFile = await drive.files.create({
-              requestBody: { name: `${input.certificateId}-QR.png`, parents: folderId ? [folderId] : undefined },
-              media: { mimeType: 'image/png', body: Buffer.from(qrBuffer) },
-              fields: 'id',
-            });
-            await drive.permissions.create({
-              fileId: qrFile.data.id as string,
-              requestBody: { role: 'reader', type: 'anyone' },
-            });
-            const width = el.size?.width?.magnitude ?? 1_500_000;
-            const height = el.size?.height?.magnitude ?? 1_500_000;
-            qrObjectId = `qr_${Date.now()}`;
-            requests.push({
-              createImage: {
-                objectId: qrObjectId,
-                url: `https://drive.google.com/uc?export=view&id=${qrFile.data.id}`,
-                elementProperties: {
-                  pageObjectId: slide.objectId,
-                  size: { width: { magnitude: width, unit: 'EMU' }, height: { magnitude: height, unit: 'EMU' } },
-                  transform: {
-                    scaleX: el.transform?.scaleX ?? 1,
-                    scaleY: el.transform?.scaleY ?? 1,
-                    translateX: el.transform?.translateX ?? 0,
-                    translateY: el.transform?.translateY ?? 0,
-                    unit: 'EMU',
-                  },
-                },
-              },
-            });
-            break;
+          const id = el.objectId as string;
+          if (signatureIds.has(id)) continue;
+          const text = elementText(el);
+          if (PROTECTED_TOKENS.some((token) => text.includes(token)) || text.includes('{{')) continue;
+          if (elementTop(el) >= bandTop - SIGNATURE_BAND_PAD_EMU && elementBottom(el) <= bandBottom + SIGNATURE_BAND_PAD_EMU) {
+            signatureIds.add(id);
           }
         }
       }
-    } catch {
-      // QR insertion is best-effort: the certificate is still valid without it.
+      // Deletions run first so the replacement pass cannot leave an empty box behind.
+      requests.unshift(...[...signatureIds].map((objectId) => ({ deleteObject: { objectId } })));
+      console.log(
+        `[certificates] removed the signature block (${signatureIds.size} element(s)) from certificate ${input.certificateId}`,
+      );
+    } else {
+      console.warn(
+        `[certificates] no signature placeholders found in template ${input.templateId || cfg.templateId}; nothing to remove for ${input.certificateId}`,
+      );
+    }
+
+    // Insert the verification QR image over the {{QR_CODE}} placeholder.
+    if (qrShape && qrSlideId) {
+      try {
+        const qrBuffer = await QRCode.toBuffer(input.verifyUrl, { margin: 1, width: 420 });
+        const qrFile = await drive.files.create({
+          requestBody: { name: `${input.certificateId}-QR.png`, parents: folderId ? [folderId] : undefined },
+          media: { mimeType: 'image/png', body: Buffer.from(qrBuffer) },
+          fields: 'id',
+        });
+        await drive.permissions.create({
+          fileId: qrFile.data.id as string,
+          requestBody: { role: 'reader', type: 'anyone' },
+        });
+        requests.push({
+          createImage: {
+            objectId: `qr_${Date.now()}`,
+            url: `https://drive.google.com/uc?export=view&id=${qrFile.data.id}`,
+            elementProperties: {
+              pageObjectId: qrSlideId,
+              size: {
+                width: { magnitude: qrShape.size?.width?.magnitude ?? 1_500_000, unit: 'EMU' },
+                height: { magnitude: qrShape.size?.height?.magnitude ?? 1_500_000, unit: 'EMU' },
+              },
+              transform: {
+                scaleX: qrShape.transform?.scaleX ?? 1,
+                scaleY: qrShape.transform?.scaleY ?? 1,
+                translateX: qrShape.transform?.translateX ?? 0,
+                translateY: qrShape.transform?.translateY ?? 0,
+                unit: 'EMU',
+              },
+            },
+          },
+        });
+      } catch (err) {
+        // QR insertion is best-effort: the certificate is still valid without it.
+        console.warn(`[certificates] QR insertion failed for ${input.certificateId}: ${(err as Error).message}`);
+      }
     }
 
     if (requests.length) {
@@ -770,21 +828,8 @@ export async function renderCertificatePdf(
       { align: 'center' },
     );
 
-    // Signature lines
-    const sigY = 470;
-    const sigs = [
-      { label: 'Course Coordinator', x: 120 },
-      { label: 'Head of the Department', x: W / 2 - 85 },
-      { label: 'Principal', x: W - 290 },
-    ];
-    for (const s of sigs) {
-      doc.moveTo(s.x, sigY).lineTo(s.x + 170, sigY).lineWidth(0.8).strokeColor(gold).stroke();
-      doc.fillColor('#E8D9F5').font('Helvetica').fontSize(8.5).text(s.label, s.x, sigY + 6, {
-        width: 170,
-        align: 'center',
-      });
-    }
-
+    // The signature block is intentionally omitted (college decision): certificates are
+    // issued without a coordinator / HOD / principal signature area.
     doc.fillColor(gold).font('Helvetica-Bold').fontSize(8.5).text(`Certificate ID: ${input.certificateId}`, 60, H - 88);
     doc.fillColor('#CDB6E0').font('Helvetica').fontSize(8).text(`Issued on ${formatDate(input.issueDateIso)}`, 60, H - 76);
     doc.fillColor('#CDB6E0').fontSize(7).text('Verify authenticity at', 60, H - 64);

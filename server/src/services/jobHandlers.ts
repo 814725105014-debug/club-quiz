@@ -6,6 +6,7 @@ import { processEmail } from './email.js';
 import { syncAttemptToResults, syncCertificateToFormResponses } from './sheets.js';
 import { enqueueJob } from './jobs.js';
 import { nowIso } from '../lib/time.js';
+import { syncMirror, type MirrorKind } from './firestoreMirror.js';
 
 export const handleJob: JobHandler = async (type: JobType, payload: Record<string, unknown>) => {
   switch (type) {
@@ -42,6 +43,13 @@ export const handleJob: JobHandler = async (type: JobType, payload: Record<strin
     }
     case 'sheet_sync_certificate': {
       await syncCertificateToFormResponses(String(payload.certificateRowId ?? ''));
+      return;
+    }
+    case 'firestore_mirror': {
+      const kind = String(payload.kind ?? '') as MirrorKind;
+      const id = String(payload.id ?? '');
+      if (!id) throw new Error('firestore_mirror job is missing id.');
+      await syncMirror(kind, id);
       return;
     }
     default: {

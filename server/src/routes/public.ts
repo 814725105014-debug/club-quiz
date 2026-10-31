@@ -26,6 +26,23 @@ publicRouter.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'quiz-platform', time: new Date().toISOString() });
 });
 
+/**
+ * Public runtime configuration for the SPA. Contains only public identifiers — the
+ * Firebase web config is designed to be shipped to browsers; access control lives in
+ * Firestore rules and custom claims, and the service account never leaves the server.
+ */
+publicRouter.get('/runtime', (_req, res) => {
+  res.json({
+    authMode: env.firebase.mode,
+    firebase: env.firebase.mode === 'firebase' ? env.firebase.web : null,
+    projectId: env.firebase.projectId,
+    firestoreMirror: env.firebase.mirror,
+    providers: env.firebase.mode === 'firebase' ? ['password', 'google'] : [],
+    phoneAuthEnabled: false,
+    platform: { timezone: env.timezone },
+  });
+});
+
 publicRouter.get(
   '/verify/:certificateId',
   verifyLimiter,
