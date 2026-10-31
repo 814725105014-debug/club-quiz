@@ -2545,3 +2545,31 @@ table.table {
   position: absolute;
   left: -16px;
 }
+
+/* ------------------------------ firebase auth ------------------------------ */
+
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--purple-700, #5b2a7a);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--purple-900, #2a0f3c);
+}
+
+#recaptcha-container {
+  min-height: 0;
+}
+
+.alert-success {
+  background: #eaf7ee;
+  border: 1px solid #bfe3c9;
+  color: #1f6b38;
+}

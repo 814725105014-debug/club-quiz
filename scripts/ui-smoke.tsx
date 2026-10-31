@@ -69,6 +69,17 @@ const { createRoot } = await import('react-dom/client');
 const { BrowserRouter } = await import('react-router-dom');
 const { default: App } = await import('../web/src/App');
 
+// Resolve the demo quiz dynamically: ids change whenever the database is reseeded.
+let demoQuizId = '';
+try {
+  const quizzes = (await (await fetch(`${BASE}/api/admin/quizzes`, { headers: { Cookie: cookie } })).json()) as {
+    quizzes?: { id: string; join_code: string }[];
+  };
+  demoQuizId = quizzes.quizzes?.find((q) => q.join_code === 'DEMO01')?.id ?? quizzes.quizzes?.[0]?.id ?? '';
+} catch {
+  demoQuizId = '';
+}
+
 const routes = [
   '/',
   '/admin/login',
@@ -87,8 +98,7 @@ const routes = [
   '/verify',
   '/present/DEMO01',
   '/j/DEMO01',
-  '/admin/quizzes/qz_cea37f7171ad48e5a97f',
-  '/admin/quizzes/qz_cea37f7171ad48e5a97f/host',
+  ...(demoQuizId ? [`/admin/quizzes/${demoQuizId}`, `/admin/quizzes/${demoQuizId}/host`] : []),
 ];
 
 const problems: string[] = [];

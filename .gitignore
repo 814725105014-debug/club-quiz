@@ -32,3 +32,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Agent skill packs (installed via `npx skills add`) — tooling, not application code
+.agents/
+.claude/
+agent/
+skills-lock.json

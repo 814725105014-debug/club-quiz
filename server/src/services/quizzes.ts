@@ -1,6 +1,7 @@
 import { getDb } from '../db.js';
 import { newId, randomCode } from '../lib/ids.js';
 import { ApiError } from '../lib/http.js';
+import { queueMirror } from './firestoreMirror.js';
 import { nowIso } from '../lib/time.js';
 import type { OptionRow, QuestionRow, QuizRow } from '../domain.js';
 
@@ -94,6 +95,7 @@ export function createQuiz(input: QuizInput, createdBy: string): QuizRow {
       input.violationAutoSubmitCount ?? 3,
       createdBy,
     );
+  queueMirror('quiz', id);
   return getQuiz(id);
 }
 
@@ -153,6 +155,7 @@ export function updateQuiz(quizId: string, input: Partial<QuizInput>): QuizRow {
   values.push(nowIso());
   values.push(quizId);
   getDb().prepare(`UPDATE quizzes SET ${sets.join(', ')} WHERE id = ?`).run(...values);
+  queueMirror('quiz', quizId);
   return getQuiz(quizId);
 }
 
@@ -240,6 +243,7 @@ export function applyQuizAction(quizId: string, action: QuizAction): QuizRow {
     default:
       throw new ApiError(400, 'Unknown quiz action.', 'invalid_action');
   }
+  queueMirror('quiz', quizId);
   return getQuiz(quizId);
 }
 
@@ -255,6 +259,7 @@ export function deleteQuiz(quizId: string): void {
     );
   }
   getDb().prepare('DELETE FROM quizzes WHERE id = ?').run(quizId);
+  queueMirror('quiz', quizId);
 }
 
 export function duplicateQuiz(quizId: string, createdBy: string): QuizRow {

@@ -28,6 +28,7 @@ export function getDb(): SqliteDb {
     db.exec('PRAGMA foreign_keys = ON;');
     db.exec('PRAGMA busy_timeout = 5000;');
     migrate(db);
+    ensureAuthColumns(db);
   }
   return db as unknown as SqliteDb;
 }
@@ -37,6 +38,7 @@ export function createTestDb(): SqliteDb {
   const testDb = new DatabaseSync(':memory:');
   testDb.exec('PRAGMA foreign_keys = ON;');
   migrate(testDb);
+  ensureAuthColumns(testDb);
   return testDb as unknown as SqliteDb;
 }
 
@@ -45,6 +47,24 @@ export function setDb(next: SqliteDb | DatabaseSync): void {
 }
 
 const SCHEMA_VERSION = 1;
+
+/** Adds a column when an older database predates it (idempotent, additive only). */
+function ensureColumn(database: DatabaseSync, table: string, column: string, ddl: string): void {
+  const columns = database.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((c) => c.name === column)) {
+    database.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+}
+
+/**
+ * Firebase Authentication binds a verified Firebase user to an administrator row by
+ * uid. The row is still the source of truth for the role, so revoking access in the
+ * dashboard takes effect on the next request.
+ */
+function ensureAuthColumns(database: DatabaseSync): void {
+  ensureColumn(database, 'users', 'firebase_uid', 'firebase_uid TEXT');
+  ensureColumn(database, 'users', 'auth_provider', "auth_provider TEXT NOT NULL DEFAULT 'password'");
+}
 
 function migrate(database: DatabaseSync): void {
   const row = database.prepare('PRAGMA user_version').get() as { user_version: number } | undefined;

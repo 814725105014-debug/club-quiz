@@ -17,13 +17,17 @@
     "test": "node --import tsx --test server/test/*.test.ts",
     "test:legacy": "node legacy/tests/standalone_tests.js",
     "seed": "tsx server/src/seed.ts",
-    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit"
+    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit",
+    "firebase:provision": "tsx server/src/scripts/firebaseProvision.ts",
+    "firebase:deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
+    "firebase": "^13.1.0",
+    "firebase-admin": "^14.5.0",
     "googleapis": "^144.0.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",

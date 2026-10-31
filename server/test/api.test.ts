@@ -279,3 +279,30 @@ test('results, audit trail and dashboard reflect the run', async () => {
   assert.equal(dashboard.stats.submissions, 1);
   assert.equal(dashboard.stats.certificates.generated, 1);
 });
+
+test('runtime config exposes only public Firebase identifiers', async () => {
+  const runtime = await call<{
+    authMode: string;
+    firebase: Record<string, unknown> | null;
+    projectId: string;
+    phoneAuthEnabled: boolean;
+    providers: string[];
+  }>('/api/public/runtime');
+  assert.equal(runtime.projectId, 'embedx-assessment');
+  assert.equal(runtime.phoneAuthEnabled, false);
+  // Cookie mode is the default: no Firebase SDK config is shipped to the browser.
+  assert.equal(runtime.authMode, 'cookie');
+  assert.equal(runtime.firebase, null);
+  assert.deepEqual(runtime.providers, []);
+  const serialised = JSON.stringify(runtime);
+  assert.equal(serialised.includes('private_key'), false);
+  assert.equal(serialised.includes('service_account'), false);
+});
+
+test('a bearer token is rejected while cookie sessions are active', async () => {
+  const res = await fetch(`${base}/api/admin/auth/me`, {
+    headers: { Authorization: 'Bearer not-a-firebase-token' },
+  });
+  assert.equal(res.status, 401);
+  await res.text();
+});

@@ -57,6 +57,8 @@ kept for reference only and are **not** served by this application.
 | Web | React 18, Vite, React Router, hand-written CSS (mobile-first, no UI framework) |
 | Files | `pdfkit` (mock/local certificates), `qrcode` |
 | Google | One provider interface with three implementations: `mock`, `apps_script` (recommended), `google_api` |
+| Identity | Firebase Authentication (`AUTH_MODE=firebase`): email/password, Google, phone (prepared, off until Blaze) |
+| Read model | Firestore mirror (`FIRESTORE_MIRROR=true`) protected by `firestore.rules`; SQLite stays authoritative |
 
 `data/` (SQLite database, generated PDFs, outbox) is git-ignored.
 
@@ -165,5 +167,7 @@ docs/                 deployment, QA, Google workspace, bridge contract, securit
 - [`docs/QA.md`](docs/QA.md) — test matrix, automated checks and manual acceptance script.
 - [`docs/SECURE_DELIVERY.md`](docs/SECURE_DELIVERY.md) — anti-cheat limits and kiosk options.
 - [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — day-of-exam checklist and incident procedures.
+- [`docs/FIREBASE.md`](docs/FIREBASE.md) — Firebase Authentication + Firestore setup for project
+  `embedx-assessment`, provider status, provisioning and rules.
 
 No paid service is used, and nothing in this repository deploys itself.

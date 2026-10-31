@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { getDb } from '../db.js';
 import { newId } from '../lib/ids.js';
 import { ApiError } from '../lib/http.js';
+import { queueMirror } from './firestoreMirror.js';
 import { addMinutes, nowIso, secondsBetween } from '../lib/time.js';
 import type {
   AnswerRow,
@@ -296,6 +297,7 @@ export function joinQuiz(
     );
   }
 
+  queueMirror('participant', participant.id);
   return {
     participantToken: signParticipantToken(participant.id, quiz.id),
     participant: {
@@ -310,6 +312,11 @@ export function joinQuiz(
     maxAttempts: quiz.max_attempts,
     openAttemptId: open?.id ?? null,
   };
+}
+
+/** Keeps the Firestore participant projection in step with a registration. */
+export function mirrorParticipant(participantId: string): void {
+  queueMirror('participant', participantId);
 }
 
 function seededShuffle<T>(items: T[], seed: string): T[] {
@@ -832,6 +839,8 @@ function gradeAndCloseAttempt(attempt: AttemptRow, quiz: QuizRow, reason: string
   // Certificate workflow is queued only after closing the attempt (idempotent per attempt).
   ensureCertificateForAttempt(closed.id);
   enqueueJob('sheet_sync_result', { attemptId: closed.id });
+  queueMirror('attempt', closed.id);
+  queueMirror('participant', closed.participant_id);
   void queueSubmissionConfirmation(closed.id).then((emailId) => {
     if (emailId) enqueueJob('send_email', { emailId });
   });

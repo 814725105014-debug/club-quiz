@@ -11,6 +11,8 @@ import { getProvider, resetProviderCache } from '../services/google.js';
 import { DEFAULT_TEMPLATES, getTemplate } from '../services/email.js';
 import { enqueueJob } from '../services/jobs.js';
 import { syncAttemptToResults, syncCertificateToFormResponses } from '../services/sheets.js';
+import { syncAllFields } from '../services/firestoreMirror.js';
+import { firebaseAdminConfigured, revokeFirebaseRefreshTokens, upsertFirebaseUser } from '../services/firebase.js';
 import type { FieldRow, ParticipantRow } from '../domain.js';
 
 export const settingsRouter = Router();
@@ -232,6 +234,7 @@ settingsRouter.post(
       input.mapsToPlaceholder ?? null,
     );
     recordAudit(req, 'field.create', 'registration_field', id, { key: input.key });
+    void syncAllFields();
     res.status(201).json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
   }),
 );
@@ -283,13 +286,15 @@ settingsRouter.patch(
       }
     }
     if (!sets.length) {
-      res.json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
+      void syncAllFields();
+    res.json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
       return;
     }
     sets.push("updated_at = datetime('now')");
     vals.push(req.params.fieldId);
     db.prepare(`UPDATE registration_fields SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
     recordAudit(req, 'field.update', 'registration_field', req.params.fieldId, { fields: Object.keys(input) });
+    void syncAllFields();
     res.json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
   }),
 );
@@ -306,6 +311,7 @@ settingsRouter.delete(
     if (field.is_core) throw new ApiError(400, 'Core fields cannot be deleted; disable them instead.', 'core_field');
     db.prepare('DELETE FROM registration_fields WHERE id = ?').run(field.id);
     recordAudit(req, 'field.delete', 'registration_field', field.id, { key: field.key });
+    void syncAllFields();
     res.json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
   }),
 );
@@ -320,6 +326,7 @@ settingsRouter.post(
       db.prepare('UPDATE registration_fields SET sort_order = ? WHERE id = ?').run(index, id);
     });
     recordAudit(req, 'field.reorder', 'registration_field', 'all', { count: orderedIds.length });
+    void syncAllFields();
     res.json({ fields: db.prepare('SELECT * FROM registration_fields ORDER BY sort_order ASC').all() });
   }),
 );
@@ -484,8 +491,34 @@ settingsRouter.post(
       input.role,
       hashPassword(input.password),
     );
-    recordAudit(req, 'user.create', 'user', id, { email: input.email, role: input.role });
-    res.status(201).json({ id });
+    let firebase: { uid: string; created: boolean } | null = null;
+    let firebaseError: string | null = null;
+    if (firebaseAdminConfigured()) {
+      try {
+        firebase = await upsertFirebaseUser({
+          email: input.email.toLowerCase(),
+          password: input.password,
+          displayName: input.name,
+          role: input.role,
+        });
+        db.prepare('UPDATE users SET firebase_uid = ?, auth_provider = ? WHERE id = ?').run(
+          firebase.uid,
+          'firebase',
+          id,
+        );
+      } catch (err) {
+        // A missing Firebase user must not lose the administrator record: the super admin
+        // can retry provisioning from Team & access once the credentials are fixed.
+        firebaseError = (err as Error).message;
+      }
+    }
+    recordAudit(req, 'user.create', 'user', id, {
+      email: input.email,
+      role: input.role,
+      firebaseUid: firebase?.uid ?? null,
+      firebaseError,
+    });
+    res.status(201).json({ id, firebaseUid: firebase?.uid ?? null, firebaseError });
   }),
 );
 
@@ -537,7 +570,34 @@ settingsRouter.patch(
       values.push(user.id);
       db.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).run(...values);
     }
-    recordAudit(req, 'user.update', 'user', user.id, { fields: Object.keys(input) });
-    res.json({ ok: true });
+    let firebaseError: string | null = null;
+    if (firebaseAdminConfigured()) {
+      const row = db.prepare('SELECT email, name, firebase_uid FROM users WHERE id = ?').get(user.id) as
+        | { email: string; name: string; firebase_uid: string | null }
+        | undefined;
+      if (row) {
+        try {
+          const provisioned = await upsertFirebaseUser({
+            email: row.email,
+            password: input.password,
+            displayName: input.name ?? row.name,
+            role: input.role,
+            disabled: input.isActive === undefined ? undefined : !input.isActive,
+          });
+          if (!row.firebase_uid) {
+            db.prepare('UPDATE users SET firebase_uid = ?, auth_provider = ? WHERE id = ?').run(
+              provisioned.uid,
+              'firebase',
+              user.id,
+            );
+          }
+          if (input.isActive === false || input.password) await revokeFirebaseRefreshTokens(provisioned.uid);
+        } catch (err) {
+          firebaseError = (err as Error).message;
+        }
+      }
+    }
+    recordAudit(req, 'user.update', 'user', user.id, { fields: Object.keys(input), firebaseError });
+    res.json({ ok: true, firebaseError });
   }),
 );

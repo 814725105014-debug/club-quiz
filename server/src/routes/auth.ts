@@ -20,6 +20,8 @@ import { recordAudit } from '../audit.js';
 import { enqueueJob } from '../services/jobs.js';
 import { queueEmail, wrapEmailHtml } from '../services/email.js';
 import { getWorkspaceConfig } from '../services/config.js';
+import { bearerToken } from '../auth.js';
+import { revokeFirebaseRefreshTokens } from '../services/firebase.js';
 
 export const authRouter = Router();
 
@@ -54,6 +56,13 @@ authRouter.post(
   '/login',
   loginLimiter,
   asyncHandler(async (req, res) => {
+    if (env.firebase.mode === 'firebase') {
+      throw new ApiError(
+        400,
+        'This deployment signs administrators in with Firebase Authentication. Use the Firebase form on the sign-in page.',
+        'use_firebase_auth',
+      );
+    }
     const input = parse(loginSchema, req.body);
     const db = getDb();
     const user = db
@@ -80,12 +89,18 @@ authRouter.post(
   }),
 );
 
-authRouter.post('/logout', requireAuth, (req, res) => {
+authRouter.post('/logout', requireAuth, asyncHandler(async (req, res) => {
+  if (env.firebase.mode === 'firebase') {
+    const row = getDb().prepare('SELECT firebase_uid FROM users WHERE id = ?').get(req.admin!.id) as
+      | { firebase_uid: string | null }
+      | undefined;
+    if (row?.firebase_uid) await revokeFirebaseRefreshTokens(row.firebase_uid);
+  }
   if (req.sessionId) revokeSession(req.sessionId);
   recordAudit(req, 'auth.logout', 'user', req.admin?.id ?? '', null);
   clearSessionCookie(res);
   res.json({ ok: true });
-});
+}));
 
 authRouter.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.admin });
@@ -95,6 +110,13 @@ authRouter.post(
   '/change-password',
   requireAuth,
   asyncHandler(async (req, res) => {
+    if (env.firebase.mode === 'firebase') {
+      throw new ApiError(
+        400,
+        'Passwords are managed by Firebase Authentication. Use “Forgot password” on the sign-in page to reset it.',
+        'use_firebase_auth',
+      );
+    }
     const input = parse(
       z.object({ currentPassword: z.string().min(1), newPassword: passwordSchema }),
       req.body,

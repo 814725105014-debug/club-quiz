@@ -11,6 +11,17 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Bearer-token provider. When Firebase Authentication is the active mode, the session
+ * provider registers a callback that returns a fresh ID token, so every request carries
+ * an up-to-date credential without threading it through call sites.
+ */
+let authTokenProvider: (() => Promise<string | null>) | null = null;
+
+export function setAuthTokenProvider(provider: (() => Promise<string | null>) | null): void {
+  authTokenProvider = provider;
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
@@ -22,7 +33,8 @@ type RequestOptions = {
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  if (options.token) headers.Authorization = `Bearer ${options.token}`;
+  const token = options.token ?? (authTokenProvider ? await authTokenProvider() : null);
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   let response: Response;
   try {
@@ -72,7 +84,11 @@ export const api = {
 
 /** Downloads an authenticated admin file (CSV export etc.) through the API. */
 export async function downloadFile(path: string, fallbackName: string): Promise<void> {
-  const response = await fetch(`/api${path}`, { credentials: 'same-origin' });
+  const token = authTokenProvider ? await authTokenProvider() : null;
+  const response = await fetch(`/api${path}`, {
+    credentials: 'same-origin',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
     throw new ApiError(response.status, payload?.error || 'Download failed.', payload?.code);
