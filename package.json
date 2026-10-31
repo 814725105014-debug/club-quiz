@@ -1,22 +1,52 @@
 {
-  "name": "embedx-quiz-platform",
-  "version": "2.0.0",
-  "description": "Standalone Technical Examination & Certification Platform with Live Anti-Cheat Proctoring, Admin Conduction Switchboard & Auditorium Projector Mode for SRM TRP Engineering College (Autonomous)",
-  "main": "index.html",
-  "scripts": {
-    "deploy": "firebase deploy --only hosting",
-    "test": "node js/questions.js"
+  "name": "quiz-platform",
+  "version": "3.0.0",
+  "private": true,
+  "description": "QUIZ PLATFORM \u2014 mobile-first quiz delivery, live hosting, Google Sheets sync, Slides certificate generation and Gmail delivery for SRM TRP Engineering College (Autonomous)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
   },
-  "keywords": [
-    "embedded-systems",
-    "quiz-platform",
-    "anti-cheat",
-    "proctoring",
-    "firebase-hosting",
-    "leaderboard",
-    "srm-trp"
-  ],
-  "author": "EMBEDX & SRM TRP Engineering College",
-  "license": "MIT"
+  "scripts": {
+    "dev:api": "tsx watch server/src/index.ts",
+    "dev:web": "vite",
+    "build": "npm run build:server && npm run build:web",
+    "build:server": "tsc -p server/tsconfig.json",
+    "build:web": "vite build",
+    "start": "node dist/server/index.js",
+    "test": "node --import tsx --test server/test/*.test.ts",
+    "test:legacy": "node legacy/tests/standalone_tests.js",
+    "seed": "tsx server/src/seed.ts",
+    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "googleapis": "^144.0.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.15.2",
+    "qrcode": "^1.5.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.5",
+    "@types/pdfkit": "^0.13.8",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11"
+  }
 }
-

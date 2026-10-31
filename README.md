@@ -1,117 +1,169 @@
-# 🚀 EMBEDX Technical Examination & Certification Platform
+# QUIZ PLATFORM — SRM TRP Engineering College / EMBEDX
 
-> **Official Standalone Assessment & Certification System**  
-> **SRM TRP Engineering College (Autonomous), Irungalur, Tiruchirappalli**  
-> Hands-on Technical Workshop: *"Basics of Embedded Systems & Embedded Programming Language"*
+A mobile-first quiz delivery and **automated certification** platform: an admin console for coordinators, a
+phone-first assessment app for students, and a certificate pipeline that reuses the college's existing Google
+Workspace resources (Form, Sheet, Slides template, Gmail).
 
----
-
-## 🌟 Key Architecture & Portals
-
-1. **Student Assessment Hub (`index.html`)**
-   - **Universal Google Authentication:** Allows students to sign in with **ANY Google account** (personal or college domain).
-   - **First-Time Registration Gate:** 
-     - Student Full Name is strictly enforced in **CAPITAL LETTERS** (`input-uppercase`).
-     - Year of study strictly restricted to **`I Year`** and **`II Year`**.
-     - Authenticated Google email address is automatically extracted and locked (read-only).
-     - Once registered, future visits bypass the registration screen automatically and load the dashboard directly.
-   - **Live Proctored Examination Engine:** 
-     - Fullscreen auto-request with high-contrast, mobile touch-optimized question player.
-     - Multi-layer anti-cheat tracking: Tab switching, app minimization, window blur, and fullscreen exit detection.
-     - 3-Warning policy: Warning 1 (Alert), Warning 2 (Final Warning), Warning 3 (Automatic Instant Submission & Infraction Log).
-   - **Live Workshop Switchboard Synchronization:** Phase 1 (Quiz 1 & 2) and Phase 2 (Quiz 3, 4 & 5) are controlled dynamically by the workshop administrator.
-   - **Official Certificate Studio:** Instant generation of verifiable certificates upon achieving passing scores with QR code and print/PDF support.
-
-2. **Admin Control Center (`admin.html`)**
-   - **Live Workshop Switchboard:** Real-time toggles for Phase 1 & Phase 2 live availability.
-   - **Countdown Timer Duration Controller:** Dynamically set examination duration (10, 15, 20, or 30 minutes) for all connected participants.
-   - **Emergency Hall Broadcast:** Push instant announcement banners to all students.
-   - **Question Bank Author & Publisher:** Create, modify, and export questions across all 5 workshop sessions.
-   - **Live Anti-Cheat Infraction Stream:** Real-time audit log of student violations with CSV audit export.
-   - **Mark Sheet & Results Analytics:** View, filter by year, and export complete student results to CSV/Excel.
-
-3. **Auditorium Projector Presentation Mode (`projector.html`)**
-   - **Tailored for the 5th Floor CSE Seminar Hall Projector Screen:** Cinema-grade 16:9 widescreen layout with ultra-crisp typography legible from 30+ meters.
-   - **Top-3 Podium Showcase:** 🥇 1st Place Gold Champion, 🥈 2nd Place Silver, 🥉 3rd Place Bronze.
-   - **Dynamic Live Leaderboard:** Auto-refresh ticker updating rankings every 10 seconds.
-   - **Zero Clutter:** Presentation-only design with no interactive test inputs or admin controls.
+This replaces the earlier static `index.html` / `admin.html` prototype in this repository. The legacy files are
+kept for reference only and are **not** served by this application.
 
 ---
 
-## 📦 Directory Structure
+## 1. What it does
+
+**Assessment lifecycle**
+
+- Quiz CRUD, question bank (single choice, multiple choice, true/false), optional question images,
+  marks and negative marks, difficulty, explanation, CSV import/export.
+- Scheduling in `Asia/Kolkata`, duration, pass percentage, attempt limits, negative marking and
+  independent **question shuffle** and **option shuffle** toggles (evaluated by stable option IDs, so shuffling
+  never changes correctness).
+- Unique 6-character join code, public join link `/j/<code>`, QR download and a full-screen
+  **Presentation mode** (`/present/<code>`) with live registration/attendance/submission counters.
+- Student registration that mirrors the existing Google Form (full name, email, 12-digit register number,
+  department, course fields), validated on the server against the same patterns, with duplicate
+  registration/attempt prevention.
+- Server-authoritative timer (never trusted from the browser), autosave per answer with an offline queue and
+  recovery, review flags, unanswered warning, confirmation screen before submit, and a result screen.
+- Live host panel: start, pause, resume, extend time, end, close registration, announcements, participant list,
+  violation feed and audit trail.
+
+**Certification**
+
+- Eligibility rules per quiz (`none`, `always`, `pass`, `score_threshold`).
+- One reusable issuance service: reserve certificate number → copy the Slides template → replace the seven
+  placeholders that actually exist in the live template → export PDF → Drive folder → upsert the Form Responses
+  row → email the participant, with retries, manual retry/regenerate and a public verification page.
+- The template itself is never edited; every certificate is generated from a copy.
+- Numbering continues the college's existing sequence (prefix `SRMTRP/EEE/VAC/`, year, next number).
+
+**Reporting and operations**
+
+- Results with filters, sorting, per-question analytics, CSV export, violation timeline and email history.
+- Registration-field designer (labels, required, order, validation regex, sheet column / certificate
+  placeholder mapping), live mobile preview.
+- Spreadsheet console: tabs, mirrored rows, sync queue with retry.
+- Email templates editor, delivery log, test send, Gmail redirect safety mode.
+- Admin users and roles (`super_admin`, `quiz_admin`, `quiz_host`, `results_viewer`), hashed passwords,
+  rate limits, server-side sessions, and a complete audit log.
+
+---
+
+## 2. Stack
+
+| Layer | Choice |
+| --- | --- |
+| API | Node.js ≥ 20, Express, Zod, `node:sqlite` (WAL), `jsonwebtoken`, bcrypt-less `scrypt` password hashing |
+| Web | React 18, Vite, React Router, hand-written CSS (mobile-first, no UI framework) |
+| Files | `pdfkit` (mock/local certificates), `qrcode` |
+| Google | One provider interface with three implementations: `mock`, `apps_script` (recommended), `google_api` |
+
+`data/` (SQLite database, generated PDFs, outbox) is git-ignored.
+
+---
+
+## 3. Quick start
+
+```bash
+cp .env.example .env          # then edit the secrets
+npm install
+npm run seed                  # creates the database, admin and a demo quiz
+npm run dev:api               # API + built SPA on http://localhost:4000
+# optional, for hot reload while editing the UI:
+npm run dev:web               # Vite on :5173, proxies /api to :4000
+```
+
+Production-style run:
+
+```bash
+npm run build                 # API → dist/server, SPA → dist/web
+NODE_ENV=production npm start # single process serves API and SPA
+```
+
+Local demo credentials come from `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) and the demo quiz code is
+`DEMO01`. **Change the password before exposing the app.**
+
+Useful scripts: `npm run typecheck`, `npm test`, `npx tsx --tsconfig web/tsconfig.json scripts/ui-smoke.tsx`
+(renders every route in jsdom against a running server).
+
+---
+
+## 4. Google Workspace integration
+
+The existing resources are pinned in `.env.example`:
+
+| Resource | ID |
+| --- | --- |
+| Form / responses spreadsheet | `1jiVDFpIxGwfSlHBt3vaHl-5GFd8DPGapSS4tsR-FhJQ` |
+| Slides certificate template | `1dkfJ6PQtmeDEkcNR4xJWsWrLjSu5pkAnvY3JY44_ISo` |
+| Generated certificates folder | `1SDdCpIQHvf_WP0o9vC0ZrLHEb9vt0Q6Y` |
+| Apps Script project (existing automation) | `16hTGWLwIvGNZqPMQXdDUMasc8kZFg2atwkfWi50X9vg0zgjLUUf3MejZ` |
+
+`GOOGLE_PROVIDER` selects how the platform talks to Google:
+
+1. **`mock`** (default) — renders real PDFs locally, mirrors sheet writes into SQLite, writes email previews to
+   `data/outbox`. Everything is testable without credentials. This is what the sandbox demo runs.
+2. **`apps_script`** (recommended in production) — posts signed JSON to a webhook added to the **existing**
+   Apps Script project. No OAuth secrets in the web app, and the existing certificate function can be reused.
+   See [`docs/APPS_SCRIPT_BRIDGE.md`](docs/APPS_SCRIPT_BRIDGE.md) and `apps-script-bridge/CertificateBridge.gs`.
+3. **`google_api`** — the app calls Sheets/Slides/Drive/Gmail directly with a service account (domain-wide
+   delegation) or an OAuth refresh token. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+Because the real Google credentials were not available in this environment, the browser-facing integration is
+verified against the mock provider; the Apps Script and Google API providers are implemented and type-checked but
+must be smoke-tested once on the college workspace (steps in `docs/DEPLOYMENT.md`).
+
+---
+
+## 5. Security model (short version)
+
+- Passwords hashed with `scrypt`; sessions are opaque tokens stored hashed in SQLite, `HttpOnly` + `SameSite=Lax`
+  cookies, 12-hour expiry, revocation on deactivation/password change.
+- Login and student endpoints are rate limited; mutating admin requests are origin-checked.
+- Answer keys, other participants' data and admin routes are never sent to the student client before submission.
+- Scores and expiry are computed on the server; the timer in the browser is only a display.
+- No secrets in the frontend; only `.env.example` is committed.
+- Emails default to **test mode** (redirected to the admin inbox) so no bulk participant email can be sent by
+  accident.
+
+Known, honest limitation: browser JavaScript cannot prevent OS-level app switching, screenshots or a second
+device. The platform logs visibility/blur/fullscreen/context-menu/copy-paste events and applies configurable
+warnings/auto-submit rules; it does not claim to detect everything. See [`docs/SECURE_DELIVERY.md`](docs/SECURE_DELIVERY.md).
+
+---
+
+## 6. Repository map
 
 ```
-embedx-quiz-platform/
-├── assets/
-│   └── branding/              # College & EmbedX high-res logos, emblems, and seals
-├── css/
-│   └── portal.css             # Cyber-academic dark design system & mobile styles
-├── js/
-│   └── questions.js           # Full 5-session question bank and answer keys
-├── index.html                 # Student Assessment & Certification Portal
-├── admin.html                 # Organizer & Faculty Live Control Center
-├── projector.html             # 5th Floor Seminar Hall Projector Presentation
-├── firebase.json              # Firebase Hosting configuration
-├── .firebaserc                # Firebase project identifier (embedx-assessment)
-├── package.json               # NPM package descriptor & scripts
-└── README.md                  # System manual and deployment guide
+server/src/
+  app.ts, index.ts, bootstrap.ts, seed.ts
+  auth.ts, audit.ts, db.ts, domain.ts, env.ts
+  lib/{ids,time,http,csv}.ts
+  services/  config, google (3 providers), jobs + jobHandlers, sheets,
+             email, certificates, attempts, quizzes, stats
+  routes/    auth, quizzes, results, settings, student, public
+web/src/
+  App.tsx, styles.css
+  lib/{api,types,format,session,hooks,student}
+  components/{ui,Icon,Layout,QuizForm,QuestionForm}
+  pages/            admin screens
+  pages/student/    landing, join, attempt, result
+scripts/ui-smoke.tsx  route-level render smoke test
+apps-script/          the college's existing automation (reference, not modified)
+apps-script-bridge/   NEW bridge code to paste into that project when ready
+docs/                 deployment, QA, Google workspace, bridge contract, security
 ```
 
 ---
 
-## 💻 Step-by-Step Git Bash Commands for New GitHub Repository
+## 7. Documentation
 
-Follow these commands in **Git Bash** to push this folder to your brand-new GitHub repository:
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — production setup, TLS, backups, Google provider options.
+- [`docs/GOOGLE_WORKSPACE.md`](docs/GOOGLE_WORKSPACE.md) — audited sheet schema, certificate placeholders,
+  numbering and non-destructive migration rules.
+- [`docs/APPS_SCRIPT_BRIDGE.md`](docs/APPS_SCRIPT_BRIDGE.md) — bridge contract and install steps.
+- [`docs/QA.md`](docs/QA.md) — test matrix, automated checks and manual acceptance script.
+- [`docs/SECURE_DELIVERY.md`](docs/SECURE_DELIVERY.md) — anti-cheat limits and kiosk options.
+- [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — day-of-exam checklist and incident procedures.
 
-### Step 1: Open Git Bash and navigate into the folder
-```bash
-cd /c/embedx-quiz-platform
-```
-
-### Step 2: Initialize Git in this folder
-```bash
-git init
-```
-
-### Step 3: Add all files to staging
-```bash
-git add .
-```
-
-### Step 4: Create your initial commit
-```bash
-git commit -m "feat: Initial commit of EMBEDX Standalone Quiz Platform 2.0"
-```
-
-### Step 5: Set default branch to main
-```bash
-git branch -M main
-```
-
-### Step 6: Link to your new GitHub repository
-*(Create an empty repository on GitHub first, e.g., `https://github.com/YOUR_USERNAME/embedx-quiz-platform.git`, then run:)*
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/embedx-quiz-platform.git
-```
-
-### Step 7: Push all files to GitHub
-```bash
-git push -u origin main
-```
-
----
-
-## 🚀 Live Firebase Deployment
-
-To deploy this standalone platform to Firebase Hosting:
-
-```bash
-cd /c/EmbedX/embedx-quiz-platform
-firebase deploy --only hosting
-```
-
-Your live endpoints will be available at:
-- **Student Assessment Hub:** `https://embedx-assessment.web.app/`
-- **Admin Control Center:** `https://embedx-assessment.web.app/admin.html`
-- **Seminar Hall Projector Display:** `https://embedx-assessment.web.app/projector.html`
-
+No paid service is used, and nothing in this repository deploys itself.
