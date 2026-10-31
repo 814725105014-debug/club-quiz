@@ -3,6 +3,23 @@ node_modules/
 .pnp
 .pnp.js
 
+# Build output
+dist/
+.vite/
+
+# Runtime data (SQLite DB, generated certificate PDFs, backups)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+service-account*.json
+
 # Firebase
 .firebase/
 firebase-debug.log*
@@ -15,4 +32,3 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
-
