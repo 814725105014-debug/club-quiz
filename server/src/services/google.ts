@@ -9,18 +9,7 @@ import { getWorkspaceConfig, type WorkspaceConfig } from './config.js';
 import { formatDate } from '../lib/time.js';
 import { randomCode } from '../lib/ids.js';
 
-/**
- * Placeholders that mark the signature block of the college template. The whole block is
- * removed from every generated copy (option b: no signature area at all) — the template
- * itself is never modified.
- */
-const SIGNATURE_TOKENS = ['{{COORDINATOR_SIGNATURE}}', '{{HOD_SIGNATURE}}', '{{PRINCIPAL_SIGNATURE}}'];
-
-/** Vertical slack when deciding which neighbouring shapes belong to the signature block. */
-const SIGNATURE_BAND_PAD_EMU = 400_000;
-
-/** Placeholders that must never be deleted while clearing the signature block. */
-const PROTECTED_TOKENS = ['{{NAME}}', '{{COURSE_NAME}}', '{{ISSUE_DATE}}', '{{QR_CODE}}', '{{CERTIFICATE_ID}}'];
+import { planSignatureRemoval, SIGNATURE_TOKENS, type SlideLayout } from './certificateLayout.js';
 
 export interface CertificateInput {
   certificateId: string;
@@ -420,63 +409,46 @@ export class GoogleApiProvider implements GoogleProvider {
       fields: 'slides(objectId,pageElements(objectId,size,transform,shape(text(textElements(textRun(content))))))',
     });
 
-    type Element = NonNullable<NonNullable<typeof pres.data.slides>[number]['pageElements']>[number];
-    const elementText = (el: Element) =>
-      (el.shape?.text?.textElements ?? []).map((te) => te.textRun?.content ?? '').join('');
-    const elementTop = (el: Element) => el.transform?.translateY ?? 0;
-    const elementBottom = (el: Element) => elementTop(el) + (el.size?.height?.magnitude ?? 0);
+    // Map the Slides response into the layout shapes the planner understands, then let the
+    // pure planner decide what belongs to the signature band (unit-tested in
+    // server/test/certificateLayout.test.ts).
+    const layout: SlideLayout[] = (pres.data.slides ?? []).map((slide) => ({
+      objectId: slide.objectId ?? undefined,
+      elements: (slide.pageElements ?? []).map((el) => ({
+        objectId: el.objectId as string,
+        text: (el.shape?.text?.textElements ?? []).map((te) => te.textRun?.content ?? '').join(''),
+        top: el.transform?.translateY ?? 0,
+        height: el.size?.height?.magnitude ?? 0,
+        left: el.transform?.translateX ?? 0,
+        width: el.size?.width?.magnitude ?? 0,
+        scaleX: el.transform?.scaleX ?? 1,
+        scaleY: el.transform?.scaleY ?? 1,
+      })),
+    }));
 
-    // Locate the signature tokens and the QR placeholder on the copy (not the template).
-    const signatureIds = new Set<string>();
-    const signatureShapes: Element[] = [];
-    let qrShape: Element | undefined;
-    let qrSlideId: string | undefined;
-    let bandTop = Number.POSITIVE_INFINITY;
-    let bandBottom = Number.NEGATIVE_INFINITY;
+    const plan = planSignatureRemoval(layout);
 
-    for (const slide of pres.data.slides ?? []) {
-      for (const el of slide.pageElements ?? []) {
-        const text = elementText(el);
-        if (text.includes('{{QR_CODE}}')) {
-          qrShape = el;
-          qrSlideId = slide.objectId ?? undefined;
-        }
-        if (SIGNATURE_TOKENS.some((token) => text.includes(token))) {
-          signatureIds.add(el.objectId as string);
-          signatureShapes.push(el);
-          bandTop = Math.min(bandTop, elementTop(el));
-          bandBottom = Math.max(bandBottom, elementBottom(el));
-        }
-      }
-    }
-
-    if (signatureShapes.length) {
-      // Swallow the labels and rules that sit beside the tokens, but never a shape that
-      // still carries a placeholder we need (name, course, date, QR, certificate id).
-      for (const slide of pres.data.slides ?? []) {
-        for (const el of slide.pageElements ?? []) {
-          const id = el.objectId as string;
-          if (signatureIds.has(id)) continue;
-          const text = elementText(el);
-          if (PROTECTED_TOKENS.some((token) => text.includes(token)) || text.includes('{{')) continue;
-          if (elementTop(el) >= bandTop - SIGNATURE_BAND_PAD_EMU && elementBottom(el) <= bandBottom + SIGNATURE_BAND_PAD_EMU) {
-            signatureIds.add(id);
-          }
-        }
-      }
+    if (plan.signatureCount > 0) {
       // Deletions run first so the replacement pass cannot leave an empty box behind.
-      requests.unshift(...[...signatureIds].map((objectId) => ({ deleteObject: { objectId } })));
+      requests.unshift(...plan.deleteIds.map((objectId) => ({ deleteObject: { objectId } })));
       console.log(
-        `[certificates] removed the signature block (${signatureIds.size} element(s)) from certificate ${input.certificateId}`,
+        `[certificates] removed the signature block (${plan.deleteIds.length} element(s), band ${
+          plan.band ? `${Math.round(plan.band.top)}-${Math.round(plan.band.bottom)} EMU` : 'n/a'
+        }) from certificate ${input.certificateId}`,
       );
     } else {
       console.warn(
-        `[certificates] no signature placeholders found in template ${input.templateId || cfg.templateId}; nothing to remove for ${input.certificateId}`,
+        `[certificates] no signature placeholders found in template ${
+          input.templateId || cfg.templateId
+        }; nothing to remove for ${input.certificateId}`,
       );
+    }
+    for (const warning of plan.warnings) {
+      console.warn(`[certificates] ${input.certificateId}: ${warning}`);
     }
 
     // Insert the verification QR image over the {{QR_CODE}} placeholder.
-    if (qrShape && qrSlideId) {
+    if (plan.qr) {
       try {
         const qrBuffer = await QRCode.toBuffer(input.verifyUrl, { margin: 1, width: 420 });
         const qrFile = await drive.files.create({
@@ -493,16 +465,16 @@ export class GoogleApiProvider implements GoogleProvider {
             objectId: `qr_${Date.now()}`,
             url: `https://drive.google.com/uc?export=view&id=${qrFile.data.id}`,
             elementProperties: {
-              pageObjectId: qrSlideId,
+              pageObjectId: plan.qr.slideId,
               size: {
-                width: { magnitude: qrShape.size?.width?.magnitude ?? 1_500_000, unit: 'EMU' },
-                height: { magnitude: qrShape.size?.height?.magnitude ?? 1_500_000, unit: 'EMU' },
+                width: { magnitude: plan.qr.element.width || 1_500_000, unit: 'EMU' },
+                height: { magnitude: plan.qr.element.height || 1_500_000, unit: 'EMU' },
               },
               transform: {
-                scaleX: qrShape.transform?.scaleX ?? 1,
-                scaleY: qrShape.transform?.scaleY ?? 1,
-                translateX: qrShape.transform?.translateX ?? 0,
-                translateY: qrShape.transform?.translateY ?? 0,
+                scaleX: plan.qr.element.scaleX ?? 1,
+                scaleY: plan.qr.element.scaleY ?? 1,
+                translateX: plan.qr.element.left ?? 0,
+                translateY: plan.qr.element.top ?? 0,
                 unit: 'EMU',
               },
             },

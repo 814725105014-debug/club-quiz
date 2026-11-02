@@ -7,8 +7,9 @@
 | Server typecheck | `npx tsc -p server/tsconfig.json --noEmit` | pass |
 | Web typecheck | `npx tsc -p web/tsconfig.json --noEmit` | pass |
 | Production build | `npm run build` | pass (server `dist/server`, SPA `dist/web`) |
-| Route render smoke (jsdom, live API) | `npx tsx --tsconfig web/tsconfig.json scripts/ui-smoke.tsx` | 19/19 routes render, no error banners |
-| API end-to-end (isolated DB) | `npm test` | 6/6 pass |
+| Route render smoke (jsdom, live API) | `npx tsx --tsconfig web/tsconfig.json scripts/ui-smoke.tsx` | 20/20 routes render, no error banners |
+| CI (GitHub Actions) | `.github/workflows/ci.yml` | typecheck → test → build → secret scan |
+| API end-to-end + layout unit tests (isolated DB) | `npm test` | 16/16 pass |
 | Concurrency/limiter | login limiter (10/min/IP), join (5/min), save (60/min) | exercised with 429 responses |
 
 `scripts/ui-smoke.tsx` logs in, injects the session cookie, mounts the real `App` in jsdom at every route

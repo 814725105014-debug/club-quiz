@@ -156,7 +156,14 @@ Hosting-only deploy serves the UI and must reach the API cross-origin. If you go
 The recommended free setup is still **one origin**: Express serves both the SPA and the API
 (`docs/DEPLOYMENT.md`), with Firebase used only for identity and the Firestore read model.
 
-## 8. Verification
+## 8. Readiness page
+
+`Admin → Readiness` (`GET /api/admin/setup`) reports live state rather than intentions: whether a
+service account is present, whether the provider answers and which spreadsheet tabs exist, the next
+certificate number, email test mode and the job queue. It is the fastest way to answer "is this
+deployment actually ready?" before an exam, and it never displays credentials.
+
+## 9. Verification
 
 ```bash
 npm test                                   # 8 tests, incl. runtime-config and bearer rejection

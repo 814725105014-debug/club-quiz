@@ -95,6 +95,7 @@ const routes = [
   '/admin/settings',
   '/admin/users',
   '/admin/audit',
+  '/admin/setup',
   '/verify',
   '/present/DEMO01',
   '/j/DEMO01',
