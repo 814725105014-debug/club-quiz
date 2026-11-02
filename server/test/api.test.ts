@@ -306,3 +306,32 @@ test('a bearer token is rejected while cookie sessions are active', async () => 
   assert.equal(res.status, 401);
   await res.text();
 });
+
+test('readiness endpoint requires a session and never leaks credentials', async () => {
+  const unauthenticated = await fetch(`${base}/api/admin/setup`);
+  assert.equal(unauthenticated.status, 401);
+  await unauthenticated.text();
+
+  const setup = await call<{
+    ready: boolean;
+    summary: { ok: number; warn: number; fail: number };
+    checks: { id: string; status: string; detail: string }[];
+    environment: Record<string, unknown>;
+  }>('/api/admin/setup');
+
+  assert.equal(typeof setup.ready, 'boolean');
+  assert.ok(setup.checks.length >= 7, 'every integration should be reported');
+  // A test deployment must have no blocking issue and must find the three tabs.
+  assert.equal(setup.summary.fail, 0);
+  assert.ok(setup.checks.some((c) => c.id === 'google.tabs' && c.status === 'ok'));
+  // Mock provider + email test mode are the only expected warnings here.
+  assert.deepEqual(
+    setup.checks.filter((c) => c.status === 'warn').map((c) => c.id).sort(),
+    ['email.mode', 'google.provider'],
+  );
+
+  const serialised = JSON.stringify(setup);
+  for (const forbidden of ['private_key', 'BEGIN PRIVATE', 'password', 'secret']) {
+    assert.equal(serialised.toLowerCase().includes(forbidden.toLowerCase()), false, `leaked ${forbidden}`);
+  }
+});
