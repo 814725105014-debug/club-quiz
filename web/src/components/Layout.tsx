@@ -34,6 +34,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: string; en
     group: 'Administration',
     items: [
       { to: '/admin/settings', label: 'Settings', icon: 'settings' },
+      { to: '/admin/setup', label: 'Readiness', icon: 'check' },
       { to: '/admin/users', label: 'Team & access', icon: 'shield' },
       { to: '/admin/audit', label: 'Audit trail', icon: 'eye' },
     ],

@@ -12,6 +12,7 @@ import { resultsRouter } from './routes/results.js';
 import { settingsRouter } from './routes/settings.js';
 import { studentRouter } from './routes/student.js';
 import { publicRouter } from './routes/public.js';
+import { setupRouter } from './routes/setup.js';
 import { getWorkspaceConfig } from './services/config.js';
 
 /**
@@ -112,6 +113,7 @@ export function createApp(): Express {
   app.use('/api/admin/questions', questionsRouter);
   app.use('/api/admin', resultsRouter);
   app.use('/api/admin', settingsRouter);
+  app.use('/api/admin', setupRouter);
   app.use('/api/student', studentRouter);
   app.use('/api/public', publicRouter);
 

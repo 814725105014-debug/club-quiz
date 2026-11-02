@@ -20,6 +20,7 @@ import Emails from './pages/Emails';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Audit from './pages/Audit';
+import Setup from './pages/Setup';
 import NotFound from './pages/NotFound';
 import Landing from './pages/student/Landing';
 import Join from './pages/student/Join';
@@ -42,6 +43,7 @@ const ADMIN_ROUTES = [
   { path: '/admin/settings', element: <Settings /> },
   { path: '/admin/users', element: <Users /> },
   { path: '/admin/audit', element: <Audit /> },
+  { path: '/admin/setup', element: <Setup /> },
 ];
 
 function BootSplash() {
