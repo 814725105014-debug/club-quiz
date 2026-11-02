@@ -69,6 +69,7 @@ kept for reference only and are **not** served by this application.
 ```bash
 cp .env.example .env          # then edit the secrets
 npm install
+npm run backup        # snapshot the database (see docs/RUNBOOK.md)
 npm run seed                  # creates the database, admin and a demo quiz
 npm run dev:api               # API + built SPA on http://localhost:4000
 # optional, for hot reload while editing the UI:
