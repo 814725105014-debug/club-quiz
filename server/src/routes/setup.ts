@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../auth.js';
 import { getDb } from '../db.js';
@@ -178,6 +180,30 @@ setupRouter.get(
       status: (queue.failed ?? 0) > 0 ? 'warn' : 'ok',
       detail: `${queue.pending ?? 0} pending, ${queue.failed ?? 0} failed job(s).`,
       action: (queue.failed ?? 0) > 0 ? 'Review failed jobs under Spreadsheet sync and retry.' : undefined,
+      docs: 'docs/RUNBOOK.md',
+    });
+
+    // Backups are operational, not application state: report how stale the newest
+    // snapshot is so the gap is visible before it matters.
+    const backupDir = path.resolve(process.env.BACKUP_DIR ?? path.join(env.dataDir, 'backups'));
+    const snapshots = fs.existsSync(backupDir)
+      ? fs
+          .readdirSync(backupDir)
+          .filter((f) => f.endsWith('.db'))
+          .map((f) => fs.statSync(path.join(backupDir, f)).mtimeMs)
+      : [];
+    const newest = snapshots.length ? Math.max(...snapshots) : 0;
+    const ageDays = newest ? Math.floor((Date.now() - newest) / 86_400_000) : null;
+    checks.push({
+      id: 'data.backup',
+      label: 'Database snapshot',
+      group: 'data',
+      status: newest === 0 ? 'warn' : ageDays !== null && ageDays > 7 ? 'warn' : 'ok',
+      detail:
+        newest === 0
+          ? 'No snapshot has been taken yet.'
+          : `Newest snapshot is ${ageDays === 0 ? 'from today' : `${ageDays} day(s) old`}.`,
+      action: 'Run: npm run backup (and schedule it outside the app).',
       docs: 'docs/RUNBOOK.md',
     });
 

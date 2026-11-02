@@ -324,11 +324,11 @@ test('readiness endpoint requires a session and never leaks credentials', async 
   // A test deployment must have no blocking issue and must find the three tabs.
   assert.equal(setup.summary.fail, 0);
   assert.ok(setup.checks.some((c) => c.id === 'google.tabs' && c.status === 'ok'));
-  // Mock provider + email test mode are the only expected warnings here.
-  assert.deepEqual(
-    setup.checks.filter((c) => c.status === 'warn').map((c) => c.id).sort(),
-    ['email.mode', 'google.provider'],
-  );
+  // Mock provider + email test mode are the only expected warnings here; a fresh
+  // test database legitimately also reports that no snapshot has been taken yet.
+  const warnings = setup.checks.filter((c) => c.status === 'warn').map((c) => c.id).sort();
+  assert.deepEqual(warnings.filter((id) => id !== 'data.backup'), ['email.mode', 'google.provider']);
+  assert.ok(setup.checks.some((c) => c.id === 'data.backup'), 'backup freshness is reported');
 
   const serialised = JSON.stringify(setup);
   for (const forbidden of ['private_key', 'BEGIN PRIVATE', 'password', 'secret']) {
